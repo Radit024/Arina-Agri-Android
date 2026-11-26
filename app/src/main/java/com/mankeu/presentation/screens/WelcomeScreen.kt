@@ -27,7 +27,11 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.foundation.border
 import androidx.compose.ui.unit.dp
+import com.mankeu.presentation.ArinaShapes
+import com.mankeu.presentation.ArinaSizes
+import com.mankeu.presentation.ArinaSpacing
 import com.mankeu.presentation.components.primaryActionButtonColors
 import com.mankeu.R
 
@@ -83,13 +87,13 @@ fun WelcomeScreen(
                             disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                             disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         ),
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+                        shape = ArinaShapes.button,
+                        modifier = Modifier.fillMaxWidth().heightIn(min = ArinaSizes.buttonLarge),
                         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
                     ) {
                         if (signingIn) {
                             CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Spacer(Modifier.width(12.dp))
+                            Spacer(Modifier.width(ArinaSpacing.sm))
                         } else {
                             Icon(
                                 painter = painterResource(R.drawable.ic_google_logo),
@@ -97,23 +101,30 @@ fun WelcomeScreen(
                                 tint = androidx.compose.ui.graphics.Color.Unspecified,
                                 modifier = Modifier.size(20.dp),
                             )
-                            Spacer(Modifier.width(12.dp))
+                            Spacer(Modifier.width(ArinaSpacing.sm))
                         }
                         Text(
                             stringResource(if (signingIn) R.string.welcome_signing_in else R.string.welcome_google),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
                             textAlign = TextAlign.Center,
                         )
                     }
-                    Spacer(Modifier.height(12.dp))
+                    Spacer(Modifier.height(ArinaSpacing.sm))
                     OutlinedButton(
                         onClick = onContinueOffline,
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+                        border = BorderStroke(ArinaSizes.hairline, MaterialTheme.colorScheme.outline),
+                        shape = ArinaShapes.button,
+                        modifier = Modifier.fillMaxWidth().heightIn(min = ArinaSizes.buttonLarge),
                         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
                     ) {
-                        Text(stringResource(R.string.welcome_offline), textAlign = TextAlign.Center)
+                        Text(
+                            stringResource(R.string.welcome_offline),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            textAlign = TextAlign.Center,
+                        )
                     }
                 }
             }
@@ -125,12 +136,15 @@ fun WelcomeScreen(
 @Composable
 private fun BookkeepingArtwork(modifier: Modifier = Modifier) {
     val colors = MaterialTheme.colorScheme
+    val isDark = colors.background.luminance() < 0.5f
     Box(modifier.size(208.dp, 184.dp).clearAndSetSemantics {}, contentAlignment = Alignment.Center) {
         Box(Modifier.size(168.dp).background(colors.primaryContainer, CircleShape))
         Column(
             Modifier.rotate(-8f).size(112.dp, 144.dp)
-                .shadow(4.dp, RoundedCornerShape(16.dp))
-                .background(colors.surfaceContainerLow, RoundedCornerShape(16.dp)).padding(16.dp),
+                .then(if (isDark) Modifier else Modifier.shadow(4.dp, RoundedCornerShape(16.dp)))
+                .background(colors.surfaceContainerLow, RoundedCornerShape(16.dp))
+                .border(ArinaSizes.hairline, colors.outlineVariant, RoundedCornerShape(16.dp))
+                .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Box(Modifier.width(32.dp).height(6.dp).background(colors.primary, RoundedCornerShape(4.dp)))

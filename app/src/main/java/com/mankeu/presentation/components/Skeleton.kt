@@ -22,6 +22,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.mankeu.presentation.ArinaShapes
+import com.mankeu.presentation.ArinaSpacing
 import com.mankeu.presentation.LocalMotion
 
 /**
@@ -62,10 +64,10 @@ fun SkeletonBlock(
 /** Skeleton stand-in for the Beranda hero card. */
 @Composable
 fun SkeletonHero(modifier: Modifier = Modifier) {
-    Card(modifier.fillMaxWidth()) {
-        Column(Modifier.padding(22.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            SkeletonBlock(Modifier.fillMaxWidth(0.5f), height = 14.dp)
-            SkeletonBlock(Modifier.fillMaxWidth(0.75f), height = 34.dp, cornerRadius = 12.dp)
+    ArinaCard(modifier = modifier, shape = ArinaShapes.hero) {
+        Column(Modifier.padding(ArinaSpacing.lg), verticalArrangement = Arrangement.spacedBy(ArinaSpacing.sm)) {
+            SkeletonBlock(Modifier.fillMaxWidth(0.45f), height = 14.dp)
+            SkeletonBlock(Modifier.fillMaxWidth(0.75f), height = 36.dp, cornerRadius = 12.dp)
             SkeletonBlock(Modifier.fillMaxWidth(0.6f), height = 12.dp)
         }
     }
@@ -74,15 +76,15 @@ fun SkeletonHero(modifier: Modifier = Modifier) {
 /** Skeleton stand-in for the two-by-two metric grid. */
 @Composable
 fun SkeletonMetricGrid(modifier: Modifier = Modifier) {
-    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(ArinaSpacing.sm)) {
         repeat(2) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(ArinaSpacing.sm)) {
                 repeat(2) {
-                    Card(Modifier.weight(1f)) {
-                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                            SkeletonBlock(Modifier.fillMaxWidth(0.3f), height = 30.dp, cornerRadius = 12.dp)
-                            SkeletonBlock(Modifier.fillMaxWidth(0.7f), height = 10.dp)
-                            SkeletonBlock(Modifier.fillMaxWidth(0.55f), height = 18.dp)
+                    ArinaCard(Modifier.weight(1f)) {
+                        Column(Modifier.padding(ArinaSpacing.md), verticalArrangement = Arrangement.spacedBy(ArinaSpacing.sm)) {
+                            SkeletonBlock(Modifier.fillMaxWidth(0.32f), height = 32.dp, cornerRadius = 8.dp)
+                            SkeletonBlock(Modifier.fillMaxWidth(0.7f), height = 12.dp)
+                            SkeletonBlock(Modifier.fillMaxWidth(0.55f), height = 20.dp)
                         }
                     }
                 }
@@ -94,15 +96,15 @@ fun SkeletonMetricGrid(modifier: Modifier = Modifier) {
 /** Skeleton stand-in for a list of transaction rows. */
 @Composable
 fun SkeletonListItem(modifier: Modifier = Modifier) {
-    Card(modifier.fillMaxWidth()) {
+    ArinaCard(modifier = modifier) {
         Row(
-            Modifier.fillMaxWidth().padding(14.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            Modifier.fillMaxWidth().padding(ArinaSpacing.md),
+            horizontalArrangement = Arrangement.spacedBy(ArinaSpacing.sm),
         ) {
-            SkeletonBlock(Modifier.height(40.dp).fillMaxWidth(0.12f), height = 40.dp, cornerRadius = 20.dp)
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            SkeletonBlock(Modifier.height(40.dp).fillMaxWidth(0.14f), height = 40.dp, cornerRadius = 12.dp)
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(ArinaSpacing.xs)) {
                 SkeletonBlock(Modifier.fillMaxWidth(0.7f), height = 14.dp)
-                SkeletonBlock(Modifier.fillMaxWidth(0.45f), height = 10.dp)
+                SkeletonBlock(Modifier.fillMaxWidth(0.45f), height = 12.dp)
             }
         }
     }

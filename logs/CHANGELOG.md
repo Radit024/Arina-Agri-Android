@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Changed
+- **Native UI/UX & Design System Remake (Master Playbook + Antislop):**
+  - Introduced 3-tier spatial/radius/sizing tokens (`DesignTokens.kt`) and core reusable Compose primitives (`ArinaComponents.kt`: `ArinaCard`, `ArinaPrimaryButton`, `ArinaSecondaryButton`, `ArinaSegmentedControl`, `ArinaRatioBar`, `ArinaFieldGroup`) enforcing a strict 4pt/8pt grid, concentric corner geometry (`Inner = Outer - Padding`), 1dp hairline card separation, and a single filled primary CTA hierarchy per screen.
+  - Upgraded app shell (`MankeuApp.kt`, `HelpUi.kt`, `MankeuSheet.kt`, `RecordFab.kt`): outlined/filled stateful icons in bottom navigation and rail, concentric `Proyeksi | Realisasi` switcher, unified header icon tints, calm tonal `TourOfferCard`, and bottom sheets with 48dp Close (`X`) header buttons and equal-width thumb-zone action rows.
+  - Upgraded Beranda (`HomeScreen.kt`), Catatan (`EntryScreen.kt`), Rencana (`PlanScreen.kt`), Stok (`StockSection.kt`), and Laporan (`ReportsScreen.kt`): integrated Masuk/Keluar hero summary strip, proportional Income/Expense and Expense Distribution ratio bars, stock-level ratio bars, search bar with clear (`X`) control, and concentric 2-line segmented report tabs.
+  - Aligned Welcome, Scope Management, Berkas & Data, and Settings screens to the hairline card system, 12dp button/input shapes, inset group dividers, and dark-mode elevation without drop shadows.
 - Replaced native dark colors with Forest Charcoal, aligned six accent families and readable filled actions; updated dark artwork while preserving light assets.
 - Reorganized Settings into a grouped overview and focused pages, with current values, optional account, Help and About.
 - Added safe profile Save/discard, retained drafts/scroll across navigation and recreation, and corrected Settings tour relocation and keyboard/touch handling.

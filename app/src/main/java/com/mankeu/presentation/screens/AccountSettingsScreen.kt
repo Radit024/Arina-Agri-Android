@@ -4,8 +4,14 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.background
 import androidx.compose.ui.platform.testTag
+import com.mankeu.presentation.ArinaShapes
+import com.mankeu.presentation.ArinaSizes
+import com.mankeu.presentation.ArinaSpacing
 import com.mankeu.presentation.ProfileDraft
 import com.mankeu.presentation.SettingsPage
+import com.mankeu.presentation.components.ArinaCard
+import com.mankeu.presentation.components.ArinaPrimaryButton
+import com.mankeu.presentation.components.ArinaSecondaryButton
 import com.mankeu.presentation.components.CardDetails
 import com.mankeu.presentation.components.primaryActionButtonColors
 import com.mankeu.presentation.components.fadeThrough
@@ -166,11 +172,8 @@ private fun ProfileEditCard(
     onDraftChange: (ProfileDraft) -> Unit,
     onSaveDraft: () -> Unit,
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-    ) {
-        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+    ArinaCard {
+        Column(Modifier.padding(ArinaSpacing.lg), verticalArrangement = Arrangement.spacedBy(ArinaSpacing.md)) {
             // Header Avatar & Nama
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Surface(
@@ -292,15 +295,12 @@ private fun ProfileEditCard(
             )
 
             // Tombol Simpan Perubahan
-            Button(
+            ArinaPrimaryButton(
+                text = stringResource(R.string.profile_save),
+                icon = Icons.Default.Save,
                 onClick = onSaveDraft,
-                colors = primaryActionButtonColors(),
-                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
-            ) {
-                Icon(Icons.Default.Save, contentDescription = null, modifier = Modifier.size(18.dp))
-                Spacer(Modifier.width(8.dp))
-                Text(stringResource(R.string.profile_save), fontWeight = FontWeight.Bold)
-            }
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
     }
 }
@@ -318,11 +318,8 @@ private fun AccountCard(
     val semantic = LocalMankeuSemanticColors.current
     val feedback = LocalFeedback.current
 
-    Card(
-        modifier = Modifier.fillMaxWidth().tourTarget(TourTarget.SETTINGS_DRIVE),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-    ) {
-        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+    ArinaCard(modifier = Modifier.tourTarget(TourTarget.SETTINGS_DRIVE)) {
+        Column(Modifier.padding(ArinaSpacing.lg), verticalArrangement = Arrangement.spacedBy(ArinaSpacing.md)) {
             Text(
                 stringResource(R.string.account_section_cloud),
                 style = MaterialTheme.typography.titleSmall,
@@ -490,13 +487,10 @@ private fun AccountCard(
 private fun SystemBannerCard() {
     val semantic = LocalMankeuSemanticColors.current
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-    ) {
+    ArinaCard {
         Column(
-            modifier = Modifier.padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.padding(ArinaSpacing.lg),
+            verticalArrangement = Arrangement.spacedBy(ArinaSpacing.sm),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             MankeuAppLogo(size = 56.dp)
@@ -616,11 +610,8 @@ private fun ContactCard() {
     val subject = stringResource(R.string.settings_contact_subject, BuildConfig.VERSION_NAME)
     val noAppMessage = stringResource(R.string.settings_contact_no_app)
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-    ) {
-        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    ArinaCard {
+        Column(Modifier.padding(ArinaSpacing.lg), verticalArrangement = Arrangement.spacedBy(ArinaSpacing.xs)) {
             Text(stringResource(R.string.settings_contact_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             Text(
                 stringResource(R.string.settings_contact_desc),
@@ -634,25 +625,23 @@ private fun ContactCard() {
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(18.dp),
                 )
-                Spacer(Modifier.width(8.dp))
+                Spacer(Modifier.width(ArinaSpacing.xs))
                 Text(
                     stringResource(R.string.settings_contact_email),
                     style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.SemiBold,
                 )
             }
-            Button(
-                colors = primaryActionButtonColors(),
+            ArinaPrimaryButton(
+                text = stringResource(R.string.settings_contact_btn),
                 onClick = {
                     val intent = Intent(Intent.ACTION_SENDTO, "mailto:$email".toUri())
                         .putExtra(Intent.EXTRA_SUBJECT, subject)
                     runCatching { context.startActivity(intent) }
                         .onFailure { Toast.makeText(context, noAppMessage, Toast.LENGTH_LONG).show() }
                 },
-                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-            ) {
-                Text(stringResource(R.string.settings_contact_btn), fontWeight = FontWeight.Bold)
-            }
+                modifier = Modifier.fillMaxWidth().padding(top = ArinaSpacing.xs),
+            )
         }
     }
 }
@@ -674,14 +663,14 @@ internal fun ToggleRow(
                 role = Role.Switch,
                 onValueChange = { feedback(FeedbackEvent.TAP); onCheckedChange(it) },
             )
-            .padding(vertical = 4.dp),
+            .padding(vertical = ArinaSpacing.xxs),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(Modifier.weight(1f)) {
-            Text(title, fontWeight = FontWeight.Bold)
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(title, fontWeight = FontWeight.SemiBold)
             Text(help, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(ArinaSpacing.sm))
         Switch(checked = checked, onCheckedChange = null)
     }
 }
@@ -692,12 +681,9 @@ internal fun SettingCard(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-    ) {
-        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+    ArinaCard(modifier = modifier) {
+        Column(Modifier.padding(ArinaSpacing.lg), verticalArrangement = Arrangement.spacedBy(ArinaSpacing.sm)) {
+            Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             content()
         }
     }

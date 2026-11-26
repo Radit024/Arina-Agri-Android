@@ -9,25 +9,36 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.mankeu.R
+import com.mankeu.presentation.ArinaShapes
+import com.mankeu.presentation.ArinaSizes
+import com.mankeu.presentation.ArinaSpacing
 import com.mankeu.presentation.LocalMotion
 import com.mankeu.presentation.LocalMankeuSemanticColors
 import com.mankeu.presentation.FeedbackEvent
@@ -83,9 +94,7 @@ fun MankeuSheet(
         onDismissRequest = { feedback(FeedbackEvent.TAP); onDismiss() },
         sheetState = sheetState,
         modifier = modifier,
-        // Material 3's own bottom-sheet container tone. Stated rather than left to the default so
-        // the sheet keeps a visible step above the page in both themes without a drop shadow,
-        // which is a light-mode device and turns into a hard rim on a dark surface.
+        shape = ArinaShapes.sheet,
         containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
         contentColor = MaterialTheme.colorScheme.onSurface,
         tonalElevation = 0.dp,
@@ -95,37 +104,70 @@ fun MankeuSheet(
                 .fillMaxWidth()
                 .imePadding()
                 .navigationBarsPadding()
-                .padding(horizontal = 20.dp)
-                .padding(bottom = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
+                .padding(horizontal = ArinaSpacing.lg)
+                .padding(bottom = ArinaSpacing.md),
+            verticalArrangement = Arrangement.spacedBy(ArinaSpacing.md),
         ) {
-            Text(title, style = MaterialTheme.typography.titleLarge)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(ArinaSpacing.xs),
+            ) {
+                Text(
+                    title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.weight(1f),
+                )
+                IconButton(onClick = { feedback(FeedbackEvent.TAP); onDismiss() }) {
+                    Icon(
+                        Icons.Default.Close,
+                        contentDescription = stringResource(R.string.action_close),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(ArinaSizes.iconMd),
+                    )
+                }
+            }
             Column(
                 (if (motion.expressive) Modifier.animateContentSize(tween(motion.mediumMillis, easing = FastOutSlowInEasing)) else Modifier)
                     .weight(1f, fill = false)
                     .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(ArinaSpacing.md),
                 content = content,
             )
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Spacer(Modifier.weight(1f))
-                TextButton(onClick = onDismissClick) { Text(dismissLabel) }
+            HorizontalDivider(thickness = ArinaSizes.hairline, color = MaterialTheme.colorScheme.outlineVariant)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(ArinaSpacing.sm),
+            ) {
+                ArinaSecondaryButton(
+                    text = dismissLabel,
+                    onClick = onDismissClick,
+                    modifier = Modifier.weight(1f),
+                )
                 if (confirmLabel != null && onConfirm != null) {
-                    Button(
-                        onClick = onConfirm,
-                        enabled = confirmEnabled,
-                        colors = when {
-                            destructive -> ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.error,
-                                contentColor = MaterialTheme.colorScheme.onError,
-                            )
-                            warning -> ButtonDefaults.buttonColors(
+                    if (warning) {
+                        Button(
+                            onClick = onConfirm,
+                            enabled = confirmEnabled,
+                            shape = ArinaShapes.button,
+                            colors = ButtonDefaults.buttonColors(
                                 containerColor = semantic.warning,
                                 contentColor = semantic.onWarning,
-                            )
-                            else -> primaryActionButtonColors()
-                        },
-                    ) { Text(confirmLabel, fontWeight = FontWeight.Bold) }
+                            ),
+                            modifier = Modifier.weight(1f).heightIn(min = ArinaSizes.buttonMedium),
+                        ) {
+                            Text(confirmLabel, fontWeight = FontWeight.SemiBold, maxLines = 1)
+                        }
+                    } else {
+                        ArinaPrimaryButton(
+                            text = confirmLabel,
+                            onClick = onConfirm,
+                            enabled = confirmEnabled,
+                            destructive = destructive,
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
                 }
             }
         }

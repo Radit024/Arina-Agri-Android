@@ -38,10 +38,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.mankeu.R
 import com.mankeu.domain.FinancialEventType
+import com.mankeu.presentation.ArinaShapes
+import com.mankeu.presentation.ArinaSpacing
 import com.mankeu.presentation.LocalMankeuSemanticColors
 import com.mankeu.presentation.LocalMotion
 import com.mankeu.presentation.FeedbackEvent
 import com.mankeu.presentation.LocalFeedback
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 /**
  * The two everyday actions, in the thumb zone.
@@ -87,7 +90,7 @@ fun RecordSpeedDial(
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.End,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(ArinaSpacing.sm),
     ) {
         AnimatedVisibility(visible = expanded, enter = enter, exit = exit) {
             ExtendedFloatingActionButton(
@@ -95,12 +98,13 @@ fun RecordSpeedDial(
                     expanded = false
                     onRecord(FinancialEventType.CASH_INCOME)
                 },
+                shape = ArinaShapes.button,
                 containerColor = semantic.successContainer,
                 contentColor = semantic.onSuccessContainer,
             ) {
                 Icon(Icons.Default.ArrowDownward, contentDescription = null, modifier = Modifier.size(20.dp))
-                Spacer(Modifier.width(10.dp))
-                Text(stringResource(R.string.fab_record_income), fontWeight = FontWeight.Bold)
+                Spacer(Modifier.width(ArinaSpacing.xs))
+                Text(stringResource(R.string.fab_record_income), fontWeight = FontWeight.SemiBold)
             }
         }
         AnimatedVisibility(visible = expanded, enter = enter, exit = exit) {
@@ -109,19 +113,21 @@ fun RecordSpeedDial(
                     expanded = false
                     onRecord(FinancialEventType.CASH_EXPENSE)
                 },
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                contentColor = MaterialTheme.colorScheme.onSurface,
+                shape = ArinaShapes.button,
+                containerColor = semantic.dangerContainer,
+                contentColor = semantic.onDangerContainer,
             ) {
                 Icon(Icons.Default.ArrowUpward, contentDescription = null, modifier = Modifier.size(20.dp))
-                Spacer(Modifier.width(10.dp))
-                Text(stringResource(R.string.fab_record_expense), fontWeight = FontWeight.Bold)
+                Spacer(Modifier.width(ArinaSpacing.xs))
+                Text(stringResource(R.string.fab_record_expense), fontWeight = FontWeight.SemiBold)
             }
         }
         MankeuTooltip(stringResource(if (expanded) R.string.fab_close else R.string.fab_record)) {
             FloatingActionButton(
                 onClick = { feedback(FeedbackEvent.TAP); expanded = !expanded },
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                shape = RoundedCornerShape(16.dp),
+                containerColor = semantic.actionContainer,
+                contentColor = semantic.onActionContainer,
             ) {
                 Icon(
                     Icons.Default.Add,

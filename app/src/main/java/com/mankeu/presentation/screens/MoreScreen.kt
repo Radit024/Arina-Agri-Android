@@ -90,9 +90,14 @@ import com.mankeu.presentation.appLocale
 import com.mankeu.presentation.ChoiceMenu
 import com.mankeu.presentation.BusinessWords
 import com.mankeu.presentation.ImportUiState
+import com.mankeu.presentation.ArinaShapes
+import com.mankeu.presentation.ArinaSpacing
 import com.mankeu.presentation.LocalMankeuSemanticColors
 import com.mankeu.presentation.TransferUiState
 import com.mankeu.presentation.resolve
+import com.mankeu.presentation.components.ArinaCard
+import com.mankeu.presentation.components.ArinaPrimaryButton
+import com.mankeu.presentation.components.ArinaSecondaryButton
 import com.mankeu.presentation.components.MankeuSheet
 import com.mankeu.presentation.components.NoticeCard
 import com.mankeu.presentation.components.ReportRow
@@ -170,27 +175,40 @@ fun DataScreen(
         // farm and field. Everything scope-shaped now lives on one screen that can see the whole
         // tree; this card is just the way in.
         item {
-            Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
-                Row(Modifier.fillMaxWidth().padding(18.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f)) {
-                        Text(stringResource(R.string.manage_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+            ArinaCard {
+                Row(
+                    Modifier.fillMaxWidth().padding(ArinaSpacing.lg),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(ArinaSpacing.sm),
+                ) {
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(stringResource(R.string.manage_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                         Text(
                             stringResource(R.string.data_manage_count, state.businesses.size, state.projects.size),
+                            style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
-                    OutlinedButton(onClick = onManageScope) { Text(stringResource(R.string.action_manage)) }
+                    ArinaSecondaryButton(text = stringResource(R.string.action_manage), onClick = onManageScope)
                 }
             }
         }
         item {
-            Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
-                Row(Modifier.fillMaxWidth().padding(18.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f)) {
-                        Text(stringResource(R.string.manage_categories), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
-                        Text(stringResource(R.string.data_master_count, state.categories.size), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            ArinaCard {
+                Row(
+                    Modifier.fillMaxWidth().padding(ArinaSpacing.lg),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(ArinaSpacing.sm),
+                ) {
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(stringResource(R.string.manage_categories), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                        Text(
+                            stringResource(R.string.data_master_count, state.categories.size),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
-                    OutlinedButton(onClick = { masterDataDialog = true }) { Text(stringResource(R.string.action_manage)) }
+                    ArinaSecondaryButton(text = stringResource(R.string.action_manage), onClick = { masterDataDialog = true })
                 }
             }
         }
@@ -199,15 +217,11 @@ fun DataScreen(
             items(state.importBatches, key = { it.id }) { batch -> ImportBatchCard(batch, onReverseImportBatch) }
         }
         item {
-            Card(modifier = Modifier.fillMaxWidth().tourTarget(TourTarget.DATA_EXPORT), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
-                Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(stringResource(R.string.data_export_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
-                    Text(stringResource(R.string.data_export_sub), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    // Four stacked full-width buttons became one row of three peers plus the
-                    // backup action. Excel, PDF and the blank template are the same kind of thing
-                    // — "give me a file" — and reading them as a row says so; a backup is not a
-                    // document you send anyone, so it keeps its own line.
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+            ArinaCard(modifier = Modifier.tourTarget(TourTarget.DATA_EXPORT)) {
+                Column(Modifier.padding(ArinaSpacing.lg), verticalArrangement = Arrangement.spacedBy(ArinaSpacing.sm)) {
+                    Text(stringResource(R.string.data_export_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.data_export_sub), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Row(horizontalArrangement = Arrangement.spacedBy(ArinaSpacing.xs), modifier = Modifier.fillMaxWidth()) {
                         ExportAction(
                             icon = Icons.Default.Download,
                             label = stringResource(R.string.data_export_excel),
@@ -230,10 +244,13 @@ fun DataScreen(
                             modifier = Modifier.weight(1f),
                         )
                     }
-                    OutlinedButton(onClick = { backupDialog = true }, enabled = !transferWorking, modifier = Modifier.fillMaxWidth().tourTarget(TourTarget.DATA_BACKUP)) {
-                        Icon(Icons.Default.Backup, null)
-                        Text(" " + stringResource(R.string.data_export_backup))
-                    }
+                    ArinaSecondaryButton(
+                        text = stringResource(R.string.data_export_backup),
+                        icon = Icons.Default.Backup,
+                        enabled = !transferWorking,
+                        onClick = { backupDialog = true },
+                        modifier = Modifier.fillMaxWidth().tourTarget(TourTarget.DATA_BACKUP),
+                    )
                     val semantic = LocalMankeuSemanticColors.current
     val motion = LocalMotion.current
                     AnimatedContent(
@@ -347,14 +364,14 @@ internal fun ImportCard(
 ) {
     val semantic = LocalMankeuSemanticColors.current
     val motion = LocalMotion.current
-    Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
-        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    ArinaCard {
+        Column(Modifier.padding(ArinaSpacing.lg), verticalArrangement = Arrangement.spacedBy(ArinaSpacing.sm)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 StateIllustration(StateArtwork.IMPORT, Modifier.size(64.dp))
-                Spacer(Modifier.width(10.dp))
-                Column {
-                    Text(stringResource(R.string.import_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
-                    Text(stringResource(R.string.import_sub), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(Modifier.width(ArinaSpacing.sm))
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(stringResource(R.string.import_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.import_sub), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
             // Import is three steps and the card already knows which one it is on, but until now
@@ -379,11 +396,11 @@ internal fun ImportCard(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     when (displayState) {
-                        ImportUiState.Idle -> Button(
-                            colors = primaryActionButtonColors(),
+                        ImportUiState.Idle -> ArinaPrimaryButton(
+                            text = stringResource(R.string.import_pick),
                             onClick = onChooseWorkbook,
                             modifier = Modifier.fillMaxWidth().tourTarget(TourTarget.IMPORT_FILE_PICKER),
-                        ) { Text(stringResource(R.string.import_pick)) }
+                        )
                         ImportUiState.Loading -> {
                             Column(
                                 Modifier.fillMaxWidth().padding(vertical = 12.dp),

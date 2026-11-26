@@ -74,9 +74,12 @@ import com.mankeu.domain.BookMode
 import com.mankeu.domain.MonthlyCashFlowCalculator
 import com.mankeu.R
 import com.mankeu.presentation.AppUiState
+import com.mankeu.presentation.ArinaSpacing
 import com.mankeu.presentation.LocalMankeuSemanticColors
 import com.mankeu.presentation.LocalMotion
 import com.mankeu.presentation.appLocale
+import com.mankeu.presentation.components.ArinaCard
+import com.mankeu.presentation.components.ArinaSegmentedControl
 import com.mankeu.presentation.components.MankeuSheet
 import com.mankeu.presentation.components.ComparisonRow
 import com.mankeu.presentation.components.DateField
@@ -203,32 +206,13 @@ fun ReportsScreen(
                 )
             }
 
-            val feedback = LocalFeedback.current
-            PrimaryTabRow(
-                selectedTabIndex = ReportSection.entries.indexOf(section),
-                containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                modifier = Modifier.fillMaxWidth().tourTarget(TourTarget.REPORTS_TABS),
-            ) {
-                ReportSection.entries.forEach { item ->
-                    Tab(
-                        selected = section == item,
-                        onClick = {
-                            if (section != item) feedback(FeedbackEvent.TAP)
-                            section = item
-                        },
-                        text = {
-                            Text(
-                                stringResource(item.labelRes),
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = if (section == item) FontWeight.Bold else FontWeight.Normal,
-                                textAlign = TextAlign.Center,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        },
-                    )
-                }
-            }
+            ArinaSegmentedControl(
+                options = ReportSection.entries.map { it to stringResource(it.labelRes) },
+                selected = section,
+                onSelected = { section = it },
+                maxLines = 2,
+                modifier = Modifier.tourTarget(TourTarget.REPORTS_TABS),
+            )
 
             Box(
                 modifier = Modifier
@@ -271,36 +255,13 @@ fun ReportsScreen(
             }
         }
         item {
-            val feedback = LocalFeedback.current
-            PrimaryTabRow(
-                selectedTabIndex = ReportSection.entries.indexOf(section),
-                containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                modifier = Modifier.fillMaxWidth().tourTarget(TourTarget.REPORTS_TABS),
-            ) {
-                ReportSection.entries.forEach { item ->
-                    Tab(
-                        selected = section == item,
-                        onClick = {
-                            if (section != item) feedback(FeedbackEvent.TAP)
-                            section = item
-                        },
-                        text = {
-                            // Two lines, not one with an ellipsis: the tab names say which
-                            // statement each section holds ("Laba Rugi dan Arus Kas"), and a name
-                            // clipped to "Laba Rug…" would defeat the point of naming them at all.
-                            // Fixed rather than scrollable so all three stay visible at once.
-                            Text(
-                                stringResource(item.labelRes),
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = if (section == item) FontWeight.Bold else FontWeight.Normal,
-                                textAlign = TextAlign.Center,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        },
-                    )
-                }
-            }
+            ArinaSegmentedControl(
+                options = ReportSection.entries.map { it to stringResource(it.labelRes) },
+                selected = section,
+                onSelected = { section = it },
+                maxLines = 2,
+                modifier = Modifier.tourTarget(TourTarget.REPORTS_TABS),
+            )
         }
 
         // One AnimatedContent for the whole section body, so switching tab slides the new
@@ -378,12 +339,13 @@ private fun FinancialsSection(
         )
         
         monthlyCashFlow.forEach { month ->
-            OutlinedCard(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-            ) {
-                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(month.month.format(DateTimeFormatter.ofPattern("MMMM yyyy", locale)), fontWeight = FontWeight.SemiBold)
+            ArinaCard {
+                Column(Modifier.padding(ArinaSpacing.md), verticalArrangement = Arrangement.spacedBy(ArinaSpacing.xs)) {
+                    Text(
+                        month.month.format(DateTimeFormatter.ofPattern("MMMM yyyy", locale)),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
                     ReportRow(stringResource(R.string.reports_monthly_operating), month.operatingRupiah)
                     ReportRow(stringResource(R.string.reports_monthly_investing), month.investingRupiah)
                     ReportRow(stringResource(R.string.reports_monthly_financing), month.financingRupiah)

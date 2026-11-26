@@ -16,6 +16,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.mankeu.R
 import com.mankeu.presentation.*
+import com.mankeu.presentation.components.ArinaPrimaryButton
 import com.mankeu.presentation.components.TourTarget
 import com.mankeu.presentation.components.primaryActionButtonColors
 import com.mankeu.presentation.components.tourTarget
@@ -62,9 +63,11 @@ internal fun SettingsPreferencePage(
         }
         SettingsPage.GUIDES -> SettingCard(stringResource(R.string.settings_tour_title), Modifier.tourTarget(TourTarget.SETTINGS_GUIDES)) {
             Text(stringResource(R.string.settings_tour_desc), color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Button(onClick = onOpenHelpCenter, colors = primaryActionButtonColors(), modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
-                Text(stringResource(R.string.help_open_center))
-            }
+            ArinaPrimaryButton(
+                text = stringResource(R.string.help_open_center),
+                onClick = onOpenHelpCenter,
+                modifier = Modifier.fillMaxWidth(),
+            )
             ToggleRow(stringResource(R.string.settings_tour_offers), stringResource(R.string.settings_guides_summary), tourOffersEnabled, onTourOffersChange)
             TextButton(onClick = onResetTours, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
                 Text(stringResource(R.string.settings_tour_reset))

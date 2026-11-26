@@ -50,9 +50,17 @@ import com.mankeu.domain.StockCalculation
 import com.mankeu.domain.StockItem
 import com.mankeu.domain.StockMovementType
 import com.mankeu.domain.TransactionCalculation
+import com.mankeu.presentation.ArinaShapes
+import com.mankeu.presentation.ArinaSizes
+import com.mankeu.presentation.ArinaSpacing
 import com.mankeu.presentation.LocalMankeuSemanticColors
 import com.mankeu.presentation.LocalMotion
 import com.mankeu.presentation.SemanticIntent
+import com.mankeu.presentation.components.ArinaCard
+import com.mankeu.presentation.components.ArinaPrimaryButton
+import com.mankeu.presentation.components.ArinaRatioBar
+import com.mankeu.presentation.components.ArinaSecondaryButton
+import com.mankeu.presentation.components.ArinaSegmentedControl
 import com.mankeu.presentation.components.MankeuStatusBadge
 import com.mankeu.presentation.components.EmptyCard
 import com.mankeu.presentation.components.StateArtwork
@@ -74,25 +82,28 @@ internal fun StockCard(
 ) {
     val summary = StockCalculation.summarize(items)
     val semantic = LocalMankeuSemanticColors.current
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-    ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Inventory2, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                Spacer(Modifier.width(8.dp))
+    ArinaCard {
+        Column(Modifier.padding(ArinaSpacing.lg), verticalArrangement = Arrangement.spacedBy(ArinaSpacing.sm)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(ArinaSpacing.xs)) {
+                Surface(shape = ArinaShapes.tileSmall, color = MaterialTheme.colorScheme.primaryContainer) {
+                    Icon(
+                        Icons.Default.Inventory2,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.padding(6.dp).size(18.dp),
+                    )
+                }
                 Text(stringResource(R.string.stock_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             }
             if (compact) {
                 when {
-                    items.isEmpty() -> Text(stringResource(R.string.stock_empty), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    items.isEmpty() -> Text(stringResource(R.string.stock_empty), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     summary.lowStockCount > 0 -> MankeuStatusBadge(
                         label = stringResource(R.string.stock_low_count, summary.lowStockCount),
                         intent = SemanticIntent.WARNING,
                         icon = Icons.Default.Warning,
                     )
-                    else -> Text(stringResource(R.string.stock_all_ok), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    else -> Text(stringResource(R.string.stock_all_ok), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             } else {
                 if (items.isEmpty()) {
@@ -100,8 +111,8 @@ internal fun StockCard(
                     Text(stringResource(R.string.stock_empty), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 } else {
                     Text(stringResource(R.string.stock_value), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
-                    Text(summary.totalInventoryValueRupiah.toRupiah(), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
-                    Text(stringResource(R.string.stock_item_count, summary.totalItems))
+                    Text(summary.totalInventoryValueRupiah.toRupiah(), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.stock_item_count, summary.totalItems), style = MaterialTheme.typography.bodyMedium)
                     if (summary.lowStockCount > 0) {
                         MankeuStatusBadge(
                             label = stringResource(R.string.stock_low_count, summary.lowStockCount),
@@ -109,14 +120,17 @@ internal fun StockCard(
                             icon = Icons.Default.Warning,
                         )
                     } else {
-                        Text(stringResource(R.string.stock_all_ok), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.stock_all_ok), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
             if (onManage != null) {
-                Button(colors = primaryActionButtonColors(), onClick = onManage, modifier = Modifier.fillMaxWidth()) {
-                    Text(stringResource(R.string.stock_manage))
-                }
+                ArinaSecondaryButton(
+                    text = stringResource(R.string.stock_manage),
+                    onClick = onManage,
+                    tonal = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
         }
     }
@@ -244,88 +258,100 @@ fun StockScreen(
     ) {
         item { StockCard(items = items, onManage = null) }
         item {
-            Button(colors = primaryActionButtonColors(), onClick = { showAddItem = true }, modifier = Modifier.fillMaxWidth().tourTarget(TourTarget.STOCK_ADD)) {
-                Icon(Icons.Default.Add, contentDescription = null)
-                Spacer(Modifier.width(6.dp))
-                Text(stringResource(R.string.stock_add_item))
-            }
+            ArinaPrimaryButton(
+                text = stringResource(R.string.stock_add_item),
+                icon = Icons.Default.Add,
+                onClick = { showAddItem = true },
+                modifier = Modifier.fillMaxWidth().tourTarget(TourTarget.STOCK_ADD),
+            )
         }
         item {
             Text(stringResource(R.string.stock_tap_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         items(items, key = { it.id }) { item ->
-            Card(
+            val stockBarColor = when {
+                item.currentStock.signum() == 0 -> semantic.danger
+                item.isLowStock -> semantic.warning
+                else -> semantic.success
+            }
+            val stockLevelRatio = if (item.minAlertStock.signum() > 0) {
+                (item.currentStock.toFloat() / (item.minAlertStock.toFloat() * 2f)).coerceIn(0f, 1f)
+            } else if (item.currentStock.signum() > 0) 1f else 0f
+            ArinaCard(
                 modifier = itemMotion(
                     motion,
-                    Modifier.fillMaxWidth()
-                        .then(if (item.id == items.first().id) Modifier.tourTarget(TourTarget.STOCK_LIST) else Modifier),
-                ).clickable { movementItemId = item.id },
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                    Modifier.then(if (item.id == items.first().id) Modifier.tourTarget(TourTarget.STOCK_LIST) else Modifier),
+                ),
+                onClick = { movementItemId = item.id },
             ) {
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+                Column(
+                    Modifier.fillMaxWidth().padding(ArinaSpacing.md),
+                    verticalArrangement = Arrangement.spacedBy(ArinaSpacing.sm),
                 ) {
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                        modifier = Modifier.size(40.dp),
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                Icons.Default.Inventory2,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(20.dp),
-                            )
-                        }
-                    }
-                    Spacer(Modifier.width(12.dp))
-                    Column(Modifier.weight(1f)) {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text(item.name, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
-                            if (item.shared) {
-                                MankeuStatusBadge(
-                                    label = stringResource(R.string.stock_owner_shared),
-                                    intent = SemanticIntent.NEUTRAL,
+                        Surface(
+                            shape = ArinaShapes.tile,
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            modifier = Modifier.size(40.dp),
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    Icons.Default.Inventory2,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(ArinaSizes.iconMd),
                                 )
                             }
                         }
-                        Text(
-                            stringResource(
-                                R.string.stock_min_level,
-                                item.minAlertStock.toQuantityText(),
-                                item.unit,
-                            ),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        Text(
-                            TransactionCalculation.computeTotalRupiah(item.currentStock, item.basePriceRupiah).toRupiah(),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(
-                            "${item.currentStock.toQuantityText()} ${item.unit}",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        if (item.currentStock.signum() == 0) {
-                            MankeuStatusBadge(
-                                label = stringResource(R.string.stock_empty_badge),
-                                intent = SemanticIntent.DANGER,
+                        Spacer(Modifier.width(ArinaSpacing.sm))
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(ArinaSpacing.xs)) {
+                                Text(item.name, fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.titleMedium)
+                                if (item.shared) {
+                                    MankeuStatusBadge(
+                                        label = stringResource(R.string.stock_owner_shared),
+                                        intent = SemanticIntent.NEUTRAL,
+                                    )
+                                }
+                            }
+                            Text(
+                                stringResource(
+                                    R.string.stock_min_level,
+                                    item.minAlertStock.toQuantityText(),
+                                    item.unit,
+                                ),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
-                        } else if (item.isLowStock) {
-                            MankeuStatusBadge(
-                                label = stringResource(R.string.stock_low_badge),
-                                intent = SemanticIntent.WARNING,
+                            Text(
+                                TransactionCalculation.computeTotalRupiah(item.currentStock, item.basePriceRupiah).toRupiah(),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
+                        Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(ArinaSpacing.xxs)) {
+                            Text(
+                                "${item.currentStock.toQuantityText()} ${item.unit}",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                            )
+                            if (item.currentStock.signum() == 0) {
+                                MankeuStatusBadge(
+                                    label = stringResource(R.string.stock_empty_badge),
+                                    intent = SemanticIntent.DANGER,
+                                )
+                            } else if (item.isLowStock) {
+                                MankeuStatusBadge(
+                                    label = stringResource(R.string.stock_low_badge),
+                                    intent = SemanticIntent.WARNING,
+                                )
+                            }
+                        }
                     }
+                    ArinaRatioBar(fraction = stockLevelRatio, color = stockBarColor, height = 6.dp)
                 }
             }
         }
@@ -352,8 +378,8 @@ internal fun AddStockItemSheet(
             onSave(name, unit, price.toLongOrNull() ?: 0, initial.toQuantity(), minAlert.toQuantity(), shared)
         },
     ) {
-        OutlinedTextField(name, { name = it }, label = { Text(stringResource(R.string.stock_item_name)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(unit, { unit = it }, label = { Text(stringResource(R.string.stock_item_unit)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(name, { name = it }, label = { Text(stringResource(R.string.stock_item_name)) }, singleLine = true, shape = ArinaShapes.input, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(unit, { unit = it }, label = { Text(stringResource(R.string.stock_item_unit)) }, singleLine = true, shape = ArinaShapes.input, modifier = Modifier.fillMaxWidth())
         MoneyField(stringResource(R.string.stock_item_price), price) { price = it }
         QuantityField(stringResource(R.string.stock_item_initial), initial) { initial = it }
         QuantityField(stringResource(R.string.stock_item_min), minAlert, hint = stringResource(R.string.stock_item_min_hint)) { minAlert = it }
@@ -385,21 +411,21 @@ internal fun StockMovementSheet(
         confirmEnabled = valid,
         onConfirm = { parsed?.let { onSave(type, it, notes.trim()) } },
     ) {
-        Text(stringResource(R.string.stock_current, item.currentStock.toQuantityText(), item.unit), fontWeight = FontWeight.Bold)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            listOf(
-                StockMovementType.IN to R.string.stock_type_in,
-                StockMovementType.OUT to R.string.stock_type_out,
-                StockMovementType.ADJUSTMENT to R.string.stock_type_adjust,
-            ).forEach { (option, label) ->
-                FilterChip(selected = type == option, onClick = { type = option }, label = { Text(stringResource(label)) }, colors = FilterChipDefaults.filterChipColors(selectedContainerColor = MaterialTheme.colorScheme.primaryContainer, selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer))
-            }
-        }
+        Text(stringResource(R.string.stock_current, item.currentStock.toQuantityText(), item.unit), fontWeight = FontWeight.SemiBold)
+        ArinaSegmentedControl(
+            options = listOf(
+                StockMovementType.IN to stringResource(R.string.stock_type_in),
+                StockMovementType.OUT to stringResource(R.string.stock_type_out),
+                StockMovementType.ADJUSTMENT to stringResource(R.string.stock_type_adjust),
+            ),
+            selected = type,
+            onSelected = { type = it },
+        )
         QuantityField(
             stringResource(if (type == StockMovementType.ADJUSTMENT) R.string.stock_qty_adjust else R.string.stock_qty),
             quantity,
         ) { quantity = it }
-        OutlinedTextField(notes, { notes = it }, label = { Text(stringResource(R.string.stock_notes)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(notes, { notes = it }, label = { Text(stringResource(R.string.stock_notes)) }, singleLine = true, shape = ArinaShapes.input, modifier = Modifier.fillMaxWidth())
     }
 }
 
@@ -411,6 +437,7 @@ private fun QuantityField(label: String, value: String, hint: String? = null, on
         label = { Text(label) },
         supportingText = hint?.let { { Text(it) } },
         singleLine = true,
+        shape = ArinaShapes.input,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
         modifier = Modifier.fillMaxWidth(),
     )

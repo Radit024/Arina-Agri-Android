@@ -1,5 +1,69 @@
 # Activity Log
 
+### [2026-11-25 22:36 WIB] [Antigravity - Native Android UI/UX Design System Remake (Master Playbook + Antislop)]
+- **Goal (user-confirmed):** Remake the native Jetpack Compose UI/UX across Arina Agri following the Master Playbook UI/UX & Design System and Antislop rules (mode: `during`), preserving the Arina Green Light (`#2D6A4F`) and Forest Charcoal Dark (`#101613`) brand identity with Sora + Plus Jakarta Sans typography, dial **ENERGY 2 / RHYTHM 2 / MOTION 2**.
+- **Actions (verified):**
+  1. **3-Tier Design System Foundation (`DesignTokens.kt`, `ArinaComponents.kt`, `Theme.kt`):**
+     - Locked strict 4pt/8pt spatial scale (`ArinaSpacing`), concentric corner radii (`ArinaRadius`, `ArinaShapes`), and minimum touch/button heights (`ArinaSizes`: 48dp touch / 48dp Medium / 56dp Large).
+     - Created core reusable primitives: `ArinaCard` (1dp crisp hairline border, 20dp radius, 0dp elevation), `ArinaPrimaryButton` (single filled CTA hierarchy with optical icon padding and loading state), `ArinaSecondaryButton` (outlined/tonal equal-height 48dp), `ArinaSegmentedControl` (concentric 12dp track / 4dp padding / 8dp active thumb, optional 2-line wrap for long tab titles), `ArinaRatioBar`, and `ArinaFieldGroup`.
+  2. **App Shell & Shared Components (`MankeuApp.kt`, `HelpUi.kt`, `MankeuSheet.kt`, `RecordFab.kt`, `SharedComponents.kt`, `FormFields.kt`, `Skeleton.kt`, `CardDetails.kt`):**
+     - Upgraded `AppBottomBar` and `AppRail` to switch icons from outlined (inactive) to solid filled (active) with a crisp 1dp hairline divider instead of muddy drop shadows.
+     - Refined `ScopeHeader` with unified `onSurfaceVariant` utility icons, crisp `ScopeSummary` chip, and concentric `Proyeksi | Realisasi` `ArinaSegmentedControl`.
+     - Redesigned `TourOfferCard` as a calm tonal coach card so it no longer competes with the primary screen CTA; added `48dp` Close (`X`) header button and equal-width thumb-zone footer buttons to `MankeuSheet`.
+     - Updated `EmptyCard`, `NoticeCard`, `EventCard`, `ReportCard`, `ComparisonRow`, `MankeuStatusBadge`, `FormFields`, `Skeleton`, and `CardDetails` (added expand/collapse chevron) to obey the 4pt/8pt grid and 1dp hairline card system.
+  3. **Main & Supporting Screens (`HomeScreen.kt`, `EntryScreen.kt`, `PlanScreen.kt`, `PlanCards.kt`, `StockSection.kt`, `ReportsScreen.kt`, `WelcomeScreen.kt`, `ManageScopeScreen.kt`, `MoreScreen.kt`, `SettingsHub.kt`, `AccountSettingsScreen.kt`, `SettingsPreferencePages.kt`):**
+     - `HomeScreen`: Integrated Masuk/Keluar summary strip inside `HeroCard`, replaced raw `→` text arrow with chevron icon, added proportional Income/Expense ratio bar in Laba/Rugi card, upgraded Expense Distribution to proportional horizontal bars with category colors and shares, and demoted secondary card buttons (`Kelola Stok`, `Buka Rencana`) to tonal buttons so each screen maintains one primary CTA.
+     - `EntryScreen`, `PlanScreen`, `StockSection`, `ReportsScreen`: Added search icon + clear (`X`) button, concentric segmented filters (`Semua | Masuk | Keluar`, `Masuk | Keluar | Opname`, 2-line wrapped report tabs), stock-level ratio bars, and unified `12dp` input corners.
+     - `WelcomeScreen`, `ManageScopeScreen`, `MoreScreen`, `SettingsHub`, `AccountSettingsScreen`, `SettingsPreferencePages`: Removed dark-mode drop shadow in `WelcomeScreen` artwork, added hairline borders and inset dividers across Settings groups, and preserved all existing `testTag` and `TourTarget` hooks.
+- **Files Created/Modified:**
+  - `app/src/main/java/com/mankeu/presentation/DesignTokens.kt` (new)
+  - `app/src/main/java/com/mankeu/presentation/components/ArinaComponents.kt` (new)
+  - `app/src/main/java/com/mankeu/presentation/Theme.kt`
+  - `app/src/main/java/com/mankeu/presentation/MankeuApp.kt`
+  - `app/src/main/java/com/mankeu/presentation/guide/HelpUi.kt`
+  - `app/src/main/java/com/mankeu/presentation/components/MankeuSheet.kt`
+  - `app/src/main/java/com/mankeu/presentation/components/RecordFab.kt`
+  - `app/src/main/java/com/mankeu/presentation/components/SharedComponents.kt`
+  - `app/src/main/java/com/mankeu/presentation/components/FormFields.kt`
+  - `app/src/main/java/com/mankeu/presentation/components/Skeleton.kt`
+  - `app/src/main/java/com/mankeu/presentation/components/CardDetails.kt`
+  - `app/src/main/java/com/mankeu/presentation/components/PlanCards.kt`
+  - `app/src/main/java/com/mankeu/presentation/screens/HomeScreen.kt`
+  - `app/src/main/java/com/mankeu/presentation/screens/EntryScreen.kt`
+  - `app/src/main/java/com/mankeu/presentation/screens/PlanScreen.kt`
+  - `app/src/main/java/com/mankeu/presentation/screens/StockSection.kt`
+  - `app/src/main/java/com/mankeu/presentation/screens/ReportsScreen.kt`
+  - `app/src/main/java/com/mankeu/presentation/screens/WelcomeScreen.kt`
+  - `app/src/main/java/com/mankeu/presentation/screens/ManageScopeScreen.kt`
+  - `app/src/main/java/com/mankeu/presentation/screens/MoreScreen.kt`
+  - `app/src/main/java/com/mankeu/presentation/screens/SettingsHub.kt`
+  - `app/src/main/java/com/mankeu/presentation/screens/AccountSettingsScreen.kt`
+  - `app/src/main/java/com/mankeu/presentation/screens/SettingsPreferencePages.kt`
+  - `logs/ACTIVITY_LOG.md`, `logs/CHANGELOG.md`
+- **Verification (verified):**
+  - `python scripts/verify_visual_system.py`: PASS (334 checks, 204 contrast pairs, tightest 4.62:1 >= 4.5:1).
+  - `antislop-human/contrast-check.py`: Light primary `#2D6A4F`/`#FFFFFF` = 6.39:1 PASS; Dark primary `#8ED8AE`/`#19211C` = 9.86:1 PASS; Dark hero `#D8F3DC`/`#1B3A2A` = 10.55:1 PASS.
+  - `./gradlew testDebugUnitTest installDebug`: BUILD SUCCESSFUL; all unit tests passed and debug APK installed on `Pixel_10_Pro_XL(AVD)` (`emulator-5554`).
+  - Live emulator click-through verified zero Logcat runtime errors across Light & Dark modes: Scope Sheet creation ("Kebun Arina" / "Lahan Padi 1 Ha"), FAB speed dial & Entry Bottom Sheet (income Rp15.000.000 + expense Rp4.200.000), populated Beranda (Light & Dark), Catatan, Laporan (caught and fixed 3-tab label ellipsis), and Settings (Light & Dark theme toggle).
+
+### [2026-10-25 22:50 WIB] [Antigravity — Weekly Progress Report PDF Generation]
+- **Goal (user-confirmed):** Generate a structured, professional weekly update report for the week (19–25 October 2026) in PDF format.
+- **Actions (verified):**
+  1. Synthesized weekly engineering, architectural, and visual milestones from git commit history, ADR logs (DEC-011 s.d. DEC-035), and activity logs across 8 thematic pillars.
+  2. Built automated PDF generation script `scripts/generate_weekly_report_pdf.py` using ReportLab:
+     - Configured A4 canvas with dynamic `NumberedCanvas` delivering running headers and "Halaman X dari Y" running footers.
+     - Registered bundled project fonts (`sora_bold.ttf`, `sora_semibold.ttf`, `plus_jakarta_sans_bold.ttf`, `plus_jakarta_sans_semibold.ttf`, `plus_jakarta_sans_medium.ttf`, `plus_jakarta_sans_regular.ttf`).
+     - Embedded official Arina Agri logo (`app_icon_512x512.png`), metadata table, executive summary callout, structured bulleted sections, and a Quality Gates verification matrix table.
+     - Enforced explicit page breaks to deliver a balanced 3-page document without orphan headings or split table rows.
+  3. Rendered and verified PDF output at `docs/reports/LAPORAN_UPDATE_MINGGUAN_2026-10-25.pdf` (53,605 bytes, 3 pages).
+- **Files Created/Modified:**
+  - `scripts/generate_weekly_report_pdf.py` (new)
+  - `docs/reports/LAPORAN_UPDATE_MINGGUAN_2026-10-25.pdf` (new)
+  - `logs/ACTIVITY_LOG.md`
+- **Verification (verified):**
+  - PyMuPDF inspection confirmed exact 3-page distribution: Page 1 (Identity, Summary, Pillars 1-2), Page 2 (Pillars 3-6), Page 3 (Pillars 7-8 & Sign-off).
+  - 0 syntax/escape warnings, clean UTF-8 glyph support.
+
 ### [2026-10-25 14:35 WIB] [Codex - Consolidated native colors, cards and Settings execution]
 - **Goal (user-confirmed):** Implement the approved 2026-10-25 consolidated UI plan in the native Kotlin checkout.
 - **Task 1 (verified current-checkout):** Reconciled existing card/motion source and historical claims. Retained and adopted reviewed in-scope card simplification work and tests; added an exact two-month financial fixture. Corrected an old motion fixture from remember to rememberSaveable. Initial baseline build lacked JAVA_HOME; intermediate compilation/QA failures are documented, not counted as baseline success.

@@ -66,6 +66,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.mankeu.presentation.ArinaShapes
+import com.mankeu.presentation.ArinaSizes
+import com.mankeu.presentation.ArinaSpacing
+import com.mankeu.presentation.components.ArinaCard
+import com.mankeu.presentation.components.ArinaSecondaryButton
 import com.mankeu.presentation.components.primaryActionButtonColors
 import com.mankeu.R
 
@@ -78,28 +83,62 @@ val LocalOpenHelp = staticCompositionLocalOf<(HelpArticle) -> Unit> { {} }
  */
 @Composable
 fun TourOfferCard(stepCount: Int, onStart: () -> Unit, onLater: () -> Unit, onNever: () -> Unit, modifier: Modifier = Modifier) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+    // Secondary coach banner: uses tonal CTA so it never competes with the screen's primary CTA.
+    ArinaCard(
+        modifier = modifier,
+        shape = ArinaShapes.card,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        border = BorderStroke(ArinaSizes.hairline, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)),
     ) {
-        Column(Modifier.padding(start = 16.dp, end = 8.dp, top = 14.dp, bottom = 4.dp)) {
+        Column(
+            modifier = Modifier.padding(
+                start = ArinaSpacing.md,
+                end = ArinaSpacing.sm,
+                top = ArinaSpacing.sm,
+                bottom = ArinaSpacing.xs,
+            ),
+            verticalArrangement = Arrangement.spacedBy(ArinaSpacing.xs),
+        ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.TipsAndUpdates, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer)
-                Spacer(Modifier.width(10.dp))
+                Surface(
+                    shape = ArinaShapes.tileSmall,
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                ) {
+                    Icon(
+                        Icons.Default.TipsAndUpdates,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.padding(6.dp).size(18.dp),
+                    )
+                }
+                Spacer(Modifier.width(ArinaSpacing.sm))
                 Text(
                     stringResource(R.string.tour_offer_text, stepCount),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.weight(1f),
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
-                TextButton(onClick = onNever) { Text(stringResource(R.string.tour_offer_never)) }
+                TextButton(onClick = onNever) {
+                    Text(
+                        stringResource(R.string.tour_offer_never),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
                 Spacer(Modifier.weight(1f))
-                TextButton(onClick = onLater) { Text(stringResource(R.string.tour_offer_later)) }
-                Button(colors = primaryActionButtonColors(), onClick = onStart) { Text(stringResource(R.string.tour_offer_start), fontWeight = FontWeight.Bold) }
+                TextButton(onClick = onLater) {
+                    Text(
+                        stringResource(R.string.tour_offer_later),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                ArinaSecondaryButton(
+                    text = stringResource(R.string.tour_offer_start),
+                    onClick = onStart,
+                    tonal = true,
+                )
             }
         }
     }
@@ -213,14 +252,24 @@ private fun searchText(article: HelpArticle): String = listOf(
 
 @Composable
 private fun ArticleRow(article: HelpArticle, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-    ) {
-        Row(Modifier.padding(horizontal = 14.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(helpGroupIcon(article.group), contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
-            Spacer(Modifier.width(12.dp))
-            Text(stringResource(article.titleRes), fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+    ArinaCard(onClick = onClick) {
+        Row(
+            Modifier.padding(horizontal = ArinaSpacing.md, vertical = ArinaSpacing.sm),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Surface(
+                shape = ArinaShapes.tileSmall,
+                color = MaterialTheme.colorScheme.primaryContainer,
+            ) {
+                Icon(
+                    helpGroupIcon(article.group),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.padding(8.dp).size(18.dp),
+                )
+            }
+            Spacer(Modifier.width(ArinaSpacing.sm))
+            Text(stringResource(article.titleRes), fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
         }
     }
 }

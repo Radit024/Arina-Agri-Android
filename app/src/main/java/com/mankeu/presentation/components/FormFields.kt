@@ -30,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.mankeu.R
+import com.mankeu.presentation.ArinaShapes
 import com.mankeu.presentation.toDisplayDate
 import com.mankeu.presentation.FeedbackEvent
 import com.mankeu.presentation.LocalFeedback
@@ -103,6 +104,7 @@ fun MoneyField(
         supportingText = supportingText,
         isError = isError,
         singleLine = true,
+        shape = ArinaShapes.input,
         // Number, not Decimal: rupiah is stored as whole integers, so a decimal key would only
         // offer a separator the field then strips.
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = imeAction),
@@ -134,6 +136,7 @@ fun DateField(
             onValueChange = {},
             readOnly = true,
             singleLine = true,
+            shape = ArinaShapes.input,
             label = { Text(label) },
             trailingIcon = {
                 Row(verticalAlignment = Alignment.CenterVertically) {

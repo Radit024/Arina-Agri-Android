@@ -37,6 +37,9 @@ import com.mankeu.R
 import com.mankeu.data.ProductWithComponents
 import com.mankeu.domain.ActualMonthAnalysis
 import com.mankeu.domain.PlanAnalysis
+import com.mankeu.presentation.ArinaShapes
+import com.mankeu.presentation.ArinaSizes
+import com.mankeu.presentation.ArinaSpacing
 import com.mankeu.presentation.LocalMankeuSemanticColors
 import com.mankeu.presentation.SemanticIntent
 import com.mankeu.presentation.LocalMotion
@@ -169,12 +172,8 @@ fun PlanFeasibilityCard(
     val status = feasibilityStatusOf(plan.revenueCostRatio)
     val undefined = stringResource(R.string.reports_undefined)
     val semantic = LocalMankeuSemanticColors.current
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-    ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+    ArinaCard(modifier = modifier) {
+        Column(Modifier.padding(ArinaSpacing.lg), verticalArrangement = Arrangement.spacedBy(ArinaSpacing.sm)) {
             CardHeader(stringResource(R.string.feasibility_title), status)
             if (plan.seasonal) {
                 Text(stringResource(R.string.plan_seasonal_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -258,9 +257,12 @@ fun PlanFeasibilityCard(
             }
 
             if (onOpenPlan != null) {
-                Button(colors = primaryActionButtonColors(), onClick = onOpenPlan, modifier = Modifier.fillMaxWidth()) {
-                    Text(stringResource(R.string.plan_open))
-                }
+                ArinaSecondaryButton(
+                    text = stringResource(R.string.plan_open),
+                    onClick = onOpenPlan,
+                    tonal = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
         }
     }
@@ -327,12 +329,8 @@ fun ActualMonthCard(
     val locale = appLocale()
     val monthName = actual.month.format(java.time.format.DateTimeFormatter.ofPattern("MMMM yyyy", locale))
 
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-    ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    ArinaCard(modifier = modifier) {
+        Column(Modifier.padding(ArinaSpacing.lg), verticalArrangement = Arrangement.spacedBy(ArinaSpacing.sm)) {
             // Status headline based on actual.reached, not labeling entire business feasibility
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.primaryContainer) {

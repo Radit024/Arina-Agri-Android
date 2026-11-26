@@ -68,7 +68,12 @@ import com.mankeu.presentation.components.PlanFeasibilityCard
 import com.mankeu.presentation.components.ReportCard
 import com.mankeu.presentation.components.SectionTitle
 import com.mankeu.presentation.components.sanitizeDecimal
+import androidx.compose.foundation.layout.heightIn
+import com.mankeu.presentation.ArinaShapes
+import com.mankeu.presentation.ArinaSizes
+import com.mankeu.presentation.ArinaSpacing
 import com.mankeu.presentation.LocalMankeuSemanticColors
+import com.mankeu.presentation.components.ArinaCard
 import com.mankeu.presentation.toRupiah
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -336,19 +341,16 @@ private fun lineSubtitle(line: BudgetItemEntity, category: CategoryEntity?): Str
 
 @Composable
 private fun PlanSectionCard(title: String, hint: String, onAdd: () -> Unit, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-    ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    ArinaCard(modifier = modifier) {
+        Column(Modifier.padding(ArinaSpacing.md), verticalArrangement = Arrangement.spacedBy(ArinaSpacing.xs)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                     Text(hint, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                TextButton(onClick = onAdd) {
-                    Icon(Icons.Default.Add, contentDescription = null)
-                    Text(stringResource(R.string.action_add))
+                TextButton(onClick = onAdd, shape = ArinaShapes.button) {
+                    Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Text(stringResource(R.string.action_add), fontWeight = FontWeight.SemiBold)
                 }
             }
             content()
@@ -363,15 +365,16 @@ private fun PlanRow(
     detail: String? = null,
     onClick: () -> Unit,
 ) {
-    HorizontalDivider()
+    HorizontalDivider(thickness = ArinaSizes.hairline, color = MaterialTheme.colorScheme.outlineVariant)
     Column(
         Modifier
             .fillMaxWidth()
+            .heightIn(min = ArinaSizes.minTouchTarget)
             .clickable(onClick = onClick)
-            .padding(vertical = 10.dp),
+            .padding(vertical = ArinaSpacing.sm),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-        Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
         Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
         if (!detail.isNullOrBlank()) {
             Text(detail, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)

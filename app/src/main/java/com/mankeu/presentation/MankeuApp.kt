@@ -68,6 +68,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
+import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.AccountCircle
@@ -78,6 +79,15 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.UnfoldMore
+import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.Assessment
+import androidx.compose.material.icons.outlined.FolderOpen
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Inventory2
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.foundation.BorderStroke
+import com.mankeu.presentation.components.ArinaSegmentedControl
+import com.mankeu.presentation.components.arinaHairlineBorder
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -166,11 +176,15 @@ import java.time.LocalDate
  * NavigationRail on expanded tablet/desktop viewports.
  */
 
-enum class Destination(val labelRes: Int, val icon: ImageVector) {
-    HOME(R.string.nav_home, Icons.Default.Home),
-    ENTRY(R.string.nav_entry, Icons.AutoMirrored.Filled.ReceiptLong),
-    STOCK(R.string.nav_stock, Icons.Default.Inventory2),
-    REPORTS(R.string.nav_reports, Icons.Default.Assessment),
+enum class Destination(
+    val labelRes: Int,
+    val icon: ImageVector,
+    val outlinedIcon: ImageVector,
+) {
+    HOME(R.string.nav_home, Icons.Filled.Home, Icons.Outlined.Home),
+    ENTRY(R.string.nav_entry, Icons.AutoMirrored.Filled.ReceiptLong, Icons.AutoMirrored.Outlined.ReceiptLong),
+    STOCK(R.string.nav_stock, Icons.Filled.Inventory2, Icons.Outlined.Inventory2),
+    REPORTS(R.string.nav_reports, Icons.Filled.Assessment, Icons.Outlined.Assessment),
 }
 
 /** Cash is recorded from these; elsewhere the speed dial would sit over Laporan and Stok content. */
@@ -839,30 +853,33 @@ private fun OverlayScaffold(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
-                title = { Text(title, fontWeight = FontWeight.SemiBold) },
-                navigationIcon = {
-                    MankeuTooltip(stringResource(R.string.action_back)) {
-                        IconButton(onClick = onBack) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
-                        }
-                    }
-                },
-                actions = {
-                    if (onHelp != null) {
-                        MankeuTooltip(stringResource(R.string.tour_replay)) {
-                            IconButton(onClick = onHelp) {
-                                Icon(
-                                    Icons.AutoMirrored.Filled.HelpOutline,
-                                    contentDescription = stringResource(R.string.tour_replay),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
+            Column {
+                TopAppBar(
+                    title = { Text(title, fontWeight = FontWeight.SemiBold) },
+                    navigationIcon = {
+                        MankeuTooltip(stringResource(R.string.action_back)) {
+                            IconButton(onClick = onBack) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                             }
                         }
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
-            )
+                    },
+                    actions = {
+                        if (onHelp != null) {
+                            MankeuTooltip(stringResource(R.string.tour_replay)) {
+                                IconButton(onClick = onHelp) {
+                                    Icon(
+                                        Icons.AutoMirrored.Filled.HelpOutline,
+                                        contentDescription = stringResource(R.string.tour_replay),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                            }
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                )
+                HorizontalDivider(thickness = ArinaSizes.hairline, color = MaterialTheme.colorScheme.outlineVariant)
+            }
         },
         snackbarHost = { OperationSnackbarHost(snackbarHost) },
     ) { padding ->
@@ -929,44 +946,58 @@ private fun AppBottomBar(
     onDestination: (Destination) -> Unit,
 ) {
     val feedback = LocalFeedback.current
-    // Material 3 puts the navigation bar on `surfaceContainer`, one step above the page. In light
-    // mode a shadow adds the last bit of lift; in dark mode a black shadow is either invisible or a
-    // hard rim, so the tone difference carries it alone.
+    val dark = isDarkScheme()
+    // Crisp flat navigation bar separated by a 1dp hairline divider; active tab switches from
+    // outlined to solid filled icon with a tonal pill indicator (Master Playbook 5.2 & 6.3).
     Surface(
-        color = MaterialTheme.colorScheme.surfaceContainer,
-        shadowElevation = if (isDarkScheme()) 0.dp else 8.dp,
-        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+        color = if (dark) MaterialTheme.colorScheme.surfaceContainer else MaterialTheme.colorScheme.surfaceContainerLow,
+        shadowElevation = 0.dp,
     ) {
-        NavigationBar(
-            containerColor = Color.Transparent,
-            modifier = Modifier.navigationBarsPadding(),
-        ) {
-            Destination.entries.forEach { item ->
-                val targetModifier = when (item) {
-                    Destination.ENTRY -> Modifier.tourTarget(TourTarget.NAV_ENTRY)
-                    Destination.REPORTS -> Modifier.tourTarget(TourTarget.NAV_REPORTS)
-                    else -> Modifier
+        Column {
+            HorizontalDivider(thickness = ArinaSizes.hairline, color = MaterialTheme.colorScheme.outlineVariant)
+            NavigationBar(
+                containerColor = Color.Transparent,
+                tonalElevation = 0.dp,
+                modifier = Modifier.navigationBarsPadding(),
+            ) {
+                Destination.entries.forEach { item ->
+                    val selected = destination == item
+                    val targetModifier = when (item) {
+                        Destination.ENTRY -> Modifier.tourTarget(TourTarget.NAV_ENTRY)
+                        Destination.REPORTS -> Modifier.tourTarget(TourTarget.NAV_REPORTS)
+                        else -> Modifier
+                    }
+                    NavigationBarItem(
+                        selected = selected,
+                        onClick = {
+                            if (!selected) feedback(FeedbackEvent.TAP)
+                            onDestination(item)
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = if (selected) item.icon else item.outlinedIcon,
+                                contentDescription = stringResource(item.labelRes),
+                            )
+                        },
+                        label = {
+                            Text(
+                                stringResource(item.labelRes),
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                            selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            selectedTextColor = MaterialTheme.colorScheme.primary,
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        ),
+                        modifier = targetModifier,
+                    )
                 }
-                NavigationBarItem(
-                    selected = destination == item,
-                    onClick = {
-                        if (destination != item) feedback(FeedbackEvent.TAP)
-                        onDestination(item)
-                    },
-                    icon = { Icon(item.icon, contentDescription = stringResource(item.labelRes)) },
-                    label = {
-                        Text(
-                            stringResource(item.labelRes),
-                            fontWeight = if (destination == item) FontWeight.Bold else FontWeight.Normal,
-                        )
-                    },
-                    colors = NavigationBarItemDefaults.colors(
-                        indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-                        selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                    ),
-                    modifier = targetModifier,
-                )
             }
         }
     }
@@ -984,11 +1015,12 @@ private fun AppRail(
             .fillMaxHeight()
             .statusBarsPadding()
             .navigationBarsPadding()
-            .padding(vertical = 16.dp, horizontal = 12.dp)
+            .padding(vertical = ArinaSpacing.md, horizontal = ArinaSpacing.sm)
             .tourTarget(TourTarget.NAV_REPORTS),
-        shape = MaterialTheme.shapes.extraLarge,
-        color = MaterialTheme.colorScheme.surfaceContainer,
-        shadowElevation = 8.dp,
+        shape = ArinaShapes.card,
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        border = arinaHairlineBorder(),
+        shadowElevation = 0.dp,
     ) {
         NavigationRail(
             containerColor = Color.Transparent,
@@ -996,32 +1028,40 @@ private fun AppRail(
             header = {
                 MankeuAppLogo(
                     size = 36.dp,
-                    modifier = Modifier.padding(top = 12.dp),
+                    modifier = Modifier.padding(top = ArinaSpacing.sm),
                 )
             },
         ) {
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(ArinaSpacing.xs))
             Destination.entries.forEach { item ->
+                val selected = destination == item
                 NavigationRailItem(
-                    selected = destination == item,
+                    selected = selected,
                     onClick = {
-                        if (destination != item) feedback(FeedbackEvent.TAP)
+                        if (!selected) feedback(FeedbackEvent.TAP)
                         onDestination(item)
                     },
-                    icon = { Icon(item.icon, contentDescription = null) },
-                    label = { Text(stringResource(item.labelRes)) },
+                    icon = { Icon(if (selected) item.icon else item.outlinedIcon, contentDescription = null) },
+                    label = {
+                        Text(
+                            stringResource(item.labelRes),
+                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                        )
+                    },
                     colors = NavigationRailItemDefaults.colors(
                         indicatorColor = MaterialTheme.colorScheme.primaryContainer,
                         selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
                         selectedTextColor = MaterialTheme.colorScheme.primary,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     ),
                 )
             }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(ArinaSpacing.xs))
             NavigationRailItem(
                 selected = false,
                 onClick = onOpenSettings,
-                icon = { Icon(Icons.Default.Settings, contentDescription = null) },
+                icon = { Icon(Icons.Outlined.Settings, contentDescription = null) },
                 label = { Text(stringResource(R.string.settings_title)) },
             )
         }
@@ -1039,118 +1079,80 @@ private fun ScopeHeader(
     onReplayTour: () -> Unit,
     compact: Boolean,
 ) {
-    val motion = LocalMotion.current
-    val semantic = LocalMankeuSemanticColors.current
-    val feedback = LocalFeedback.current
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerLow,
-        shadowElevation = if (isDarkScheme()) 0.dp else 2.dp,
+        shadowElevation = 0.dp,
     ) {
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .statusBarsPadding()
-                .padding(horizontal = if (compact) 16.dp else 24.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            // One row, not three.
-            //
-            // The header used to stack an app title with a subtitle, then a pair of 56dp dropdowns,
-            // then the mode switch — roughly a fifth of a phone screen spent restating the app's
-            // own name and two values that change a few times a week. The name is on the launcher
-            // icon and in the task switcher; the two scope values are one line of text that opens
-            // the sheet that already manages them (D-065).
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                MankeuAppLogo(size = 34.dp)
-                Spacer(Modifier.width(10.dp))
-                ScopeSummary(
-                    state = state,
-                    onClick = onManageScope,
-                    modifier = Modifier.weight(1f).tourTarget(TourTarget.SCOPE_BUSINESS),
-                )
-                // Replays the tour for whatever destination is open. Placed in the header rather
-                // than buried in Pengaturan because the moment someone needs the explanation is the
-                // moment they are staring at the screen that confused them.
-                MankeuTooltip(stringResource(R.string.tour_replay)) {
-                    IconButton(onClick = onReplayTour) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.HelpOutline,
-                            contentDescription = stringResource(R.string.tour_replay),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
-                MankeuTooltip(stringResource(R.string.data_title)) {
-                    IconButton(onClick = onOpenData) {
-                        Icon(
-                            Icons.Default.FolderOpen,
-                            contentDescription = stringResource(R.string.data_title),
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
-                    }
-                }
-                MankeuTooltip(stringResource(R.string.settings_title)) {
-                    IconButton(onClick = onOpenSettings) {
-                        Icon(
-                            Icons.Default.AccountCircle,
-                            contentDescription = stringResource(R.string.settings_title),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
-            }
-
-            //
-            // Round 8 gave Realisasi the semantic success (teal) container so the two books could
-            // be told apart. It worked, and it cost more than it bought: teal is the app's money
-            // colour — Uang Masuk, a surplus, a settled receivable — and a permanent teal block in
-            // the header competed with the figures below it, which are the thing that is actually
-            // supposed to be teal or coral. A book is a scope, not an amount.
-            //
-            // Both segments use Arina's brand primaryContainer, avoiding secondaryContainer
-            // which resolves to terracotta/red (reserved strictly for danger/destructive states).
-            // Segments are clearly distinguished by the active fill, check icon, and bold weight.
-            val activeContainer = MaterialTheme.colorScheme.primaryContainer
-            val activeContent = MaterialTheme.colorScheme.onPrimaryContainer
-            SingleChoiceSegmentedButtonRow(
-                Modifier.fillMaxWidth().tourTarget(TourTarget.SCOPE_BOOK),
+        Column {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .padding(
+                        horizontal = if (compact) ArinaSpacing.screenHorizontalCompact else ArinaSpacing.screenHorizontalExpanded,
+                        vertical = ArinaSpacing.sm,
+                    ),
+                verticalArrangement = Arrangement.spacedBy(ArinaSpacing.sm),
             ) {
-                BookMode.entries.forEachIndexed { index, mode ->
-                    SegmentedButton(
-                        selected = state.selectedBookMode == mode,
-                        onClick = { feedback(FeedbackEvent.TAP); onSelectBookMode(mode) },
-                        shape = SegmentedButtonDefaults.itemShape(index = index, count = BookMode.entries.size),
-                        colors = SegmentedButtonDefaults.colors(
-                            activeContainerColor = activeContainer,
-                            activeContentColor = activeContent,
-                            activeBorderColor = MaterialTheme.colorScheme.outline,
-                            inactiveContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                            inactiveContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            inactiveBorderColor = MaterialTheme.colorScheme.outline,
-                        ),
-                        label = {
-                            Text(
-                                stringResource(
-                                    if (mode == BookMode.PROJECTION) R.string.scope_mode_plan else R.string.scope_mode_actual,
-                                ),
-                                fontWeight = if (state.selectedBookMode == mode) FontWeight.Bold else FontWeight.Medium,
-                                maxLines = 1,
-                            )
-                        },
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(ArinaSpacing.xs),
+                ) {
+                    MankeuAppLogo(size = 32.dp)
+                    ScopeSummary(
+                        state = state,
+                        onClick = onManageScope,
+                        modifier = Modifier.weight(1f).tourTarget(TourTarget.SCOPE_BUSINESS),
                     )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        MankeuTooltip(stringResource(R.string.tour_replay)) {
+                            IconButton(onClick = onReplayTour) {
+                                Icon(
+                                    Icons.AutoMirrored.Filled.HelpOutline,
+                                    contentDescription = stringResource(R.string.tour_replay),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                        MankeuTooltip(stringResource(R.string.data_title)) {
+                            IconButton(onClick = onOpenData) {
+                                Icon(
+                                    Icons.Outlined.FolderOpen,
+                                    contentDescription = stringResource(R.string.data_title),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                        MankeuTooltip(stringResource(R.string.settings_title)) {
+                            IconButton(onClick = onOpenSettings) {
+                                Icon(
+                                    Icons.Outlined.AccountCircle,
+                                    contentDescription = stringResource(R.string.settings_title),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                    }
                 }
+
+                ArinaSegmentedControl(
+                    options = listOf(
+                        BookMode.PROJECTION to stringResource(R.string.scope_mode_plan),
+                        BookMode.REALIZATION to stringResource(R.string.scope_mode_actual),
+                    ),
+                    selected = state.selectedBookMode,
+                    onSelected = onSelectBookMode,
+                    modifier = Modifier.tourTarget(TourTarget.SCOPE_BOOK),
+                )
             }
+            HorizontalDivider(thickness = ArinaSizes.hairline, color = MaterialTheme.colorScheme.outlineVariant)
         }
     }
 }
 
 /**
  * The active business and unit as one line, opening the sheet that manages them.
- *
- * Two `ExposedDropdownMenuBox`es were the wrong control for this: each carried a floating label
- * and a 56dp minimum height purely to show a value the owner changes a few times a week, and
- * neither could create, rename or archive — for that they went to the same sheet this row opens.
- * A summary that *is* the affordance costs one line and loses nothing.
  */
 @Composable
 private fun ScopeSummary(
@@ -1175,24 +1177,28 @@ private fun ScopeSummary(
                 else -> R.string.scope_add_project
             },
         )
-    // Nothing set up yet is not a neutral state — it is the one thing the owner has to do next —
-    // so the row says so in the primary tone instead of showing two grey placeholders.
     val needsSetup = !state.isLoading && (!hasBusiness || !hasProject)
 
     Surface(
         onClick = onClick,
         modifier = modifier,
-        shape = RoundedCornerShape(14.dp),
-        color = if (needsSetup) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+        shape = ArinaShapes.tile,
+        color = if (needsSetup) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer,
         contentColor = if (needsSetup) {
             MaterialTheme.colorScheme.onPrimaryContainer
         } else {
             MaterialTheme.colorScheme.onSurface
         },
+        border = if (needsSetup) {
+            BorderStroke(ArinaSizes.hairline, MaterialTheme.colorScheme.primary.copy(alpha = 0.28f))
+        } else {
+            arinaHairlineBorder()
+        },
     ) {
         Row(
-            Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+            Modifier.padding(horizontal = ArinaSpacing.sm, vertical = ArinaSpacing.xs),
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(ArinaSpacing.xs),
         ) {
             Column(Modifier.weight(1f)) {
                 Text(
@@ -1256,6 +1262,7 @@ fun ChoiceMenu(
             onValueChange = {},
             readOnly = true,
             singleLine = true,
+            shape = ArinaShapes.input,
             label = fieldLabel?.let { { Text(it, maxLines = 1, overflow = TextOverflow.Ellipsis) } },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),

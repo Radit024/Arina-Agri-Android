@@ -66,6 +66,10 @@ import com.mankeu.domain.FinancialEventType
 import com.mankeu.domain.MoneyEvent
 import com.mankeu.domain.RecordStatus
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.widthIn
+import com.mankeu.presentation.ArinaShapes
+import com.mankeu.presentation.ArinaSizes
+import com.mankeu.presentation.ArinaSpacing
 import com.mankeu.presentation.LocalMankeuSemanticColors
 import com.mankeu.presentation.SemanticIntent
 import com.mankeu.presentation.toDisplayDate
@@ -80,20 +84,19 @@ import com.mankeu.presentation.toRupiah
 @Composable
 fun NoticeCard(title: String, body: String, icon: ImageVector, onClick: (() -> Unit)? = null) {
     val semantic = LocalMankeuSemanticColors.current
-    OutlinedCard(
-        modifier = if (onClick != null) Modifier.fillMaxWidth().clickable(onClick = onClick) else Modifier.fillMaxWidth(),
-        // Pinned explicitly to `surface` (white) rather than trusting OutlinedCard's default: the
-        // same class of bug as EmptyCard below — an unpinned card tone reading visibly grayer than
-        // its white neighbours ("kontras ga rata" between adjacent cards on Beranda/Pengaturan).
-        colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-    ) {
-        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.Top) {
-            Surface(shape = RoundedCornerShape(16.dp), color = semantic.warningContainer) {
-                Icon(icon, contentDescription = null, tint = semantic.onWarningContainer, modifier = Modifier.padding(8.dp))
+    ArinaCard(onClick = onClick) {
+        Row(Modifier.padding(ArinaSpacing.md), verticalAlignment = Alignment.Top) {
+            Surface(shape = ArinaShapes.tile, color = semantic.warningContainer) {
+                Icon(
+                    icon,
+                    contentDescription = null,
+                    tint = semantic.onWarningContainer,
+                    modifier = Modifier.padding(ArinaSpacing.xs).size(ArinaSizes.iconMd),
+                )
             }
-            Spacer(Modifier.width(12.dp))
-            Column {
-                Text(title, fontWeight = FontWeight.SemiBold)
+            Spacer(Modifier.width(ArinaSpacing.sm))
+            Column(verticalArrangement = Arrangement.spacedBy(ArinaSpacing.xxs)) {
+                Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
                 Text(body, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
             }
         }
@@ -113,25 +116,24 @@ fun EmptyCard(
     artwork: StateArtwork,
     actionModifier: Modifier = Modifier,
 ) {
-    Card(
+    ArinaCard(
         modifier = if (fillMaxHeight) modifier.fillMaxSize() else modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
         Column(
             modifier = if (fillMaxHeight) {
                 Modifier
                     .fillMaxSize()
-                    .padding(24.dp)
+                    .padding(ArinaSpacing.xl)
             } else {
                 Modifier
                     .fillMaxWidth()
-                    .padding(24.dp)
+                    .padding(ArinaSpacing.xl)
             },
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = if (fillMaxHeight) {
-                Arrangement.spacedBy(12.dp, Alignment.CenterVertically)
+                Arrangement.spacedBy(ArinaSpacing.sm, Alignment.CenterVertically)
             } else {
-                Arrangement.spacedBy(12.dp)
+                Arrangement.spacedBy(ArinaSpacing.sm)
             },
         ) {
             val illustrationSize = when {
@@ -140,12 +142,36 @@ fun EmptyCard(
                 else -> 88.dp
             }
             StateIllustration(artwork, Modifier.size(illustrationSize))
-            Text(title, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
-            Text(body, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
-            if (action != null && onAction != null) Button(colors = primaryActionButtonColors(), onClick = onAction, modifier = actionModifier) { Text(action) }
+            Text(
+                title,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Center,
+            )
+            Text(
+                body,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.widthIn(max = 320.dp),
+            )
+            if (action != null && onAction != null) {
+                Spacer(Modifier.height(ArinaSpacing.xxs))
+                ArinaPrimaryButton(
+                    text = action,
+                    onClick = onAction,
+                    modifier = actionModifier.widthIn(min = 200.dp),
+                )
+            }
             if (learn != null) {
                 val openHelp = LocalOpenHelp.current
-                TextButton(onClick = { openHelp(learn) }) { Text(stringResource(R.string.help_learn_how), fontWeight = FontWeight.Bold) }
+                TextButton(onClick = { openHelp(learn) }, shape = ArinaShapes.button) {
+                    Text(
+                        stringResource(R.string.help_learn_how),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
             }
         }
     }
@@ -153,9 +179,9 @@ fun EmptyCard(
 
 @Composable
 fun SectionTitle(title: String, subtitle: String, modifier: Modifier = Modifier) {
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(ArinaSpacing.xxs)) {
         Text(title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
-        Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -191,15 +217,12 @@ fun EventCard(
         null -> ""
     }
 
-    OutlinedCard(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-    ) {
+    ArinaCard(modifier = modifier) {
         Row(
-            Modifier.fillMaxWidth().padding(start = 14.dp, top = 12.dp, bottom = 12.dp, end = 4.dp),
+            Modifier.fillMaxWidth().padding(start = ArinaSpacing.md, top = ArinaSpacing.sm, bottom = ArinaSpacing.sm, end = ArinaSpacing.xxs),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Surface(shape = CircleShape, color = container) {
+            Surface(shape = ArinaShapes.tile, color = container) {
                 Icon(
                     when {
                         isReversal -> Icons.AutoMirrored.Filled.Undo
@@ -207,15 +230,21 @@ fun EventCard(
                         else -> Icons.Default.ArrowUpward
                     },
                     contentDescription = null,
-                    modifier = Modifier.padding(10.dp).size(20.dp),
+                    modifier = Modifier.padding(10.dp).size(ArinaSizes.iconMd),
                     tint = accent,
                 )
             }
-            Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f)) {
-                Text(event.description, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Spacer(Modifier.width(ArinaSpacing.sm))
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
-                    "${event.category} • ${event.date.toDisplayDate()}",
+                    event.description,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    "${event.category} · ${event.date.toDisplayDate()}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -224,7 +253,7 @@ fun EventCard(
                 if (isReversal || isReversed) {
                     MankeuTooltip(
                         stringResource(if (isReversal) R.string.tooltip_reversal_entry else R.string.tooltip_reversed_original),
-                        modifier = Modifier.padding(top = 4.dp),
+                        modifier = Modifier.padding(top = ArinaSpacing.xxs),
                     ) {
                         MankeuStatusBadge(
                             label = stringResource(R.string.event_reversed_badge),
@@ -236,15 +265,14 @@ fun EventCard(
             Column(horizontalAlignment = Alignment.End) {
                 Text(
                     sign + event.amountRupiah.toRupiah(),
-                    modifier = Modifier.padding(end = 10.dp),
-                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(end = ArinaSpacing.sm),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
                     color = accent,
                     textDecoration = if (isReversed) TextDecoration.LineThrough else null,
                     maxLines = 1,
                     softWrap = false,
                 )
-                // Default 48dp IconButtons: these were shrunk to 36dp, under the minimum touch target,
-                // on the one control that deletes money records.
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (active) {
                         MankeuTooltip(stringResource(R.string.action_reverse_event)) {
@@ -252,7 +280,7 @@ fun EventCard(
                                 Icon(
                                     Icons.AutoMirrored.Filled.Undo,
                                     contentDescription = stringResource(R.string.action_reverse_event),
-                                    modifier = Modifier.size(20.dp),
+                                    modifier = Modifier.size(ArinaSizes.iconMd),
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
@@ -264,7 +292,7 @@ fun EventCard(
                                 Icon(
                                     Icons.Default.DeleteOutline,
                                     contentDescription = stringResource(R.string.action_delete_event),
-                                    modifier = Modifier.size(20.dp),
+                                    modifier = Modifier.size(ArinaSizes.iconMd),
                                     tint = MaterialTheme.colorScheme.error,
                                 )
                             }
@@ -342,21 +370,21 @@ fun MankeuStatusBadge(
         modifier = modifier.then(
             if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier
         ),
-        shape = RoundedCornerShape(50),
+        shape = ArinaShapes.badge,
         color = containerColor,
         contentColor = contentColor,
-        border = BorderStroke(1.dp, borderColor),
+        border = BorderStroke(ArinaSizes.hairline, borderColor),
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+            modifier = Modifier.padding(horizontal = ArinaSpacing.xs, vertical = ArinaSpacing.xxs),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(ArinaSpacing.xxs),
         ) {
             if (icon != null) {
                 Icon(
                     icon,
                     contentDescription = null,
-                    modifier = Modifier.size(13.dp),
+                    modifier = Modifier.size(14.dp),
                     tint = contentColor,
                 )
             }
@@ -474,12 +502,9 @@ fun SimpleMetricCard(metric: SimpleMetric, modifier: Modifier = Modifier) {
 
 @Composable
 fun ReportCard(title: String, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-    ) {
-        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+    ArinaCard(modifier = modifier) {
+        Column(Modifier.padding(ArinaSpacing.lg), verticalArrangement = Arrangement.spacedBy(ArinaSpacing.sm)) {
+            Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             content()
         }
     }
@@ -562,21 +587,42 @@ fun ComparisonRow(
         (delta > 0) == higherIsBetter -> semantic.success
         else -> semantic.danger
     }
+    val deltaIntent = when {
+        delta == 0L -> SemanticIntent.NEUTRAL
+        (delta > 0) == higherIsBetter -> SemanticIntent.SUCCESS
+        else -> SemanticIntent.DANGER
+    }
     Surface(
-        shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
+        shape = ArinaShapes.tile,
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        border = arinaHairlineBorder(),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(
-            modifier = Modifier.padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(ArinaSpacing.md),
+            verticalArrangement = Arrangement.spacedBy(ArinaSpacing.sm),
         ) {
-            Text(label, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    label,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.weight(1f),
+                )
+                MankeuStatusBadge(
+                    label = stringResource(R.string.compare_delta, (if (delta > 0) "+" else "") + delta.toRupiah()),
+                    intent = deltaIntent,
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(ArinaSpacing.sm),
+            ) {
+                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(
                         stringResource(R.string.scope_mode_plan),
                         style = MaterialTheme.typography.labelSmall,
@@ -588,7 +634,7 @@ fun ComparisonRow(
                         fontWeight = FontWeight.SemiBold,
                     )
                 }
-                Column(modifier = Modifier.weight(1f)) {
+                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(
                         stringResource(R.string.scope_mode_actual),
                         style = MaterialTheme.typography.labelSmall,
@@ -601,12 +647,6 @@ fun ComparisonRow(
                     )
                 }
             }
-            Text(
-                stringResource(R.string.compare_delta, (if (delta > 0) "+" else "") + delta.toRupiah()),
-                color = deltaColor,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Bold,
-            )
         }
     }
 }

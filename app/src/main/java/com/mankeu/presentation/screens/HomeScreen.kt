@@ -28,12 +28,19 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Insights
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.foundation.shape.CircleShape
+import com.mankeu.presentation.ArinaShapes
+import com.mankeu.presentation.ArinaSizes
+import com.mankeu.presentation.ArinaSpacing
+import com.mankeu.presentation.components.ArinaCard
+import com.mankeu.presentation.components.ArinaRatioBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -195,6 +202,8 @@ fun HomeScreen(
             HeroCard(
                 mode = state.selectedBookMode,
                 amount = summary.cashBalanceRupiah,
+                incomeRupiah = summary.operatingIncomeRupiah,
+                expenseRupiah = summary.operatingExpenseRupiah,
                 plan = plan,
                 projectId = state.selectedProjectId,
                 modifier = Modifier.tourTarget(TourTarget.HERO_SUMMARY),
@@ -215,16 +224,13 @@ fun HomeScreen(
             } else {
                 stringResource(R.string.home_period_all_records)
             }
-            Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                shape = MaterialTheme.shapes.large,
+            ArinaCard(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .animateContentSize(tween(maxOf(LocalMotion.current.mediumMillis, 1), easing = FastOutSlowInEasing)),
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.padding(ArinaSpacing.lg),
+                    verticalArrangement = Arrangement.spacedBy(ArinaSpacing.sm),
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -259,7 +265,17 @@ fun HomeScreen(
                         maxLines = 1,
                         autoSize = TextAutoSize.StepBased(minFontSize = 18.sp, maxFontSize = MaterialTheme.typography.headlineMedium.fontSize),
                     )
-                    HorizontalDivider()
+                    val totalFlow = (summary.operatingIncomeRupiah.coerceAtLeast(0L) + summary.operatingExpenseRupiah.coerceAtLeast(0L))
+                    if (totalFlow > 0L) {
+                        val incomeFraction = summary.operatingIncomeRupiah.coerceAtLeast(0L).toFloat() / totalFlow.toFloat()
+                        ArinaRatioBar(
+                            fraction = incomeFraction,
+                            color = semantic.success,
+                            trackColor = semantic.dangerContainer,
+                            height = 8.dp,
+                        )
+                    }
+                    HorizontalDivider(thickness = ArinaSizes.hairline, color = MaterialTheme.colorScheme.outlineVariant)
                     ReportRow(stringResource(R.string.reports_operating_income), summary.operatingIncomeRupiah)
                     ReportRow(stringResource(R.string.reports_operating_expense), summary.operatingExpenseRupiah)
                     CardDetails(
@@ -267,7 +283,7 @@ fun HomeScreen(
                         showLabel = stringResource(R.string.card_show_calculation),
                         hideLabel = stringResource(R.string.card_hide_calculation),
                     ) {
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Column(verticalArrangement = Arrangement.spacedBy(ArinaSpacing.xs)) {
                             ReportRow(stringResource(R.string.home_cash_flow), summary.operatingCashFlowRupiah)
                             Text(
                                 stringResource(R.string.home_cash_profit_help),
@@ -346,6 +362,8 @@ fun HomeScreen(
 private fun HeroCard(
     mode: BookMode,
     amount: Long,
+    incomeRupiah: Long = 0L,
+    expenseRupiah: Long = 0L,
     modifier: Modifier = Modifier,
     plan: PlanAnalysis? = null,
     projectId: String? = null,
@@ -354,11 +372,10 @@ private fun HeroCard(
     val motion = LocalMotion.current
     Card(
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        shape = ArinaShapes.hero,
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = modifier.fillMaxWidth(),
     ) {
-        // A single branded fill keeps every balance label readable. In dark mode primary is a
-        // light green, so use the deeper primary container with its matching foreground. A loss
-        // uses the expense container and its on-colour, never a hardcoded gradient endpoint.
         val dark = isDarkScheme()
         val semantic = LocalMankeuSemanticColors.current
         val isNegative = amount < 0
@@ -382,10 +399,7 @@ private fun HeroCard(
         Column(
             Modifier
                 .fillMaxWidth()
-                .background(
-                    heroStart,
-                    MaterialTheme.shapes.extraLarge,
-                )
+                .background(heroStart, ArinaShapes.hero)
                 .then(
                     if (onClick != null) {
                         Modifier.clickable(
@@ -395,9 +409,9 @@ private fun HeroCard(
                         )
                     } else Modifier
                 )
-                .padding(20.dp)
+                .padding(ArinaSpacing.lg)
                 .animateContentSize(tween(maxOf(motion.mediumMillis, 1), easing = FastOutSlowInEasing)),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(ArinaSpacing.sm),
         ) {
             AnimatedContent(
                 targetState = Pair(mode, projectId ?: ""),
@@ -416,18 +430,25 @@ private fun HeroCard(
                 } else {
                     stringResource(R.string.home_period_all_records)
                 }
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(ArinaSpacing.sm)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(
-                            stringResource(if (projection) R.string.home_balance_plan else R.string.home_balance_actual),
-                            color = onHero,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                        )
+                        Column(verticalArrangement = Arrangement.spacedBy(2.dp), modifier = Modifier.weight(1f)) {
+                            Text(
+                                stringResource(if (projection) R.string.home_balance_plan else R.string.home_balance_actual),
+                                color = onHero.copy(alpha = 0.9f),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                            Text(
+                                periodText,
+                                color = onHero.copy(alpha = 0.78f),
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
                         if (isNegative) {
                             MankeuStatusBadge(
                                 label = stringResource(R.string.status_deficit),
@@ -441,25 +462,68 @@ private fun HeroCard(
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
-                        autoSize = TextAutoSize.StepBased(minFontSize = 18.sp, maxFontSize = MaterialTheme.typography.headlineLarge.fontSize),
+                        autoSize = TextAutoSize.StepBased(minFontSize = 20.sp, maxFontSize = MaterialTheme.typography.headlineLarge.fontSize),
                     )
-                    Text(
-                        periodText,
-                        color = onHero.copy(alpha = 0.85f),
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
+                    // Integrated 2-column summary strip inside the hero (concentric 12dp tile)
+                    Surface(
+                        shape = ArinaShapes.tile,
+                        color = onHero.copy(alpha = if (dark || isNegative) 0.08f else 0.12f),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = ArinaSpacing.sm, vertical = ArinaSpacing.sm),
+                            horizontalArrangement = Arrangement.spacedBy(ArinaSpacing.sm),
+                        ) {
+                            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                Text(
+                                    stringResource(R.string.money_in_short),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = onHero.copy(alpha = 0.8f),
+                                )
+                                Text(
+                                    incomeRupiah.toRupiah(),
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = onHero,
+                                    maxLines = 1,
+                                    autoSize = TextAutoSize.StepBased(minFontSize = 11.sp, maxFontSize = MaterialTheme.typography.titleSmall.fontSize),
+                                )
+                            }
+                            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                Text(
+                                    stringResource(R.string.money_out_short),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = onHero.copy(alpha = 0.8f),
+                                )
+                                Text(
+                                    expenseRupiah.toRupiah(),
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = onHero,
+                                    maxLines = 1,
+                                    autoSize = TextAutoSize.StepBased(minFontSize = 11.sp, maxFontSize = MaterialTheme.typography.titleSmall.fontSize),
+                                )
+                            }
+                        }
+                    }
                     if (onClick != null) {
-                        Spacer(Modifier.height(4.dp))
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.End,
                             modifier = Modifier.fillMaxWidth(),
                         ) {
                             Text(
-                                stringResource(R.string.home_cash_details) + " \u2192",
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = onHero.copy(alpha = 0.8f),
+                                stringResource(R.string.home_cash_details),
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = onHero.copy(alpha = 0.9f),
+                            )
+                            Spacer(Modifier.width(ArinaSpacing.xxs))
+                            Icon(
+                                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                contentDescription = null,
+                                tint = onHero.copy(alpha = 0.9f),
+                                modifier = Modifier.size(18.dp),
                             )
                         }
                     }
@@ -475,6 +539,7 @@ private fun ExpenseDistributionCard(
     modifier: Modifier = Modifier,
 ) {
     val motion = LocalMotion.current
+    val semantic = LocalMankeuSemanticColors.current
     val otherLabel = stringResource(R.string.category_other)
     val expenseCategories = remember(
         state.categoryTotals,
@@ -513,19 +578,16 @@ private fun ExpenseDistributionCard(
     }
 
     if (expenseCategories.isNotEmpty()) {
-        val totalExpense = expenseCategories.sumOf { it.amount }
+        val totalExpense = expenseCategories.sumOf { it.amount }.coerceAtLeast(1L)
         val detailsKey = "expenses:${state.selectedBusinessId}:${state.selectedProjectId}:${state.selectedBookMode}"
-        Card(
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-            shape = MaterialTheme.shapes.large,
+        ArinaCard(
             modifier = modifier
-                .fillMaxWidth()
                 .animateContentSize(tween(maxOf(motion.mediumMillis, 1), easing = FastOutSlowInEasing))
                 .tourTarget(TourTarget.HOME_COST_CHART),
         ) {
             Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.padding(ArinaSpacing.lg),
+                verticalArrangement = Arrangement.spacedBy(ArinaSpacing.sm),
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -535,20 +597,25 @@ private fun ExpenseDistributionCard(
                     Text(
                         stringResource(R.string.home_expense_mix),
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.SemiBold,
                     )
                     Text(
                         totalExpense.toRupiah(),
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary,
                     )
                 }
 
-                HorizontalDivider()
+                HorizontalDivider(thickness = ArinaSizes.hairline, color = MaterialTheme.colorScheme.outlineVariant)
 
                 expenseCategories.take(3).forEach { slice ->
-                    ReportRow(slice.category, slice.amount, highlightNegative = false)
+                    ExpenseSliceBarRow(
+                        category = slice.category,
+                        amount = slice.amount,
+                        total = totalExpense,
+                        barColor = semantic.resolveAgricultureCategoryColor(slice.category),
+                    )
                 }
 
                 if (expenseCategories.size > 3) {
@@ -557,15 +624,61 @@ private fun ExpenseDistributionCard(
                         showLabel = stringResource(R.string.card_show_all_categories),
                         hideLabel = stringResource(R.string.card_show_fewer_categories),
                     ) {
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Column(verticalArrangement = Arrangement.spacedBy(ArinaSpacing.sm)) {
                             expenseCategories.drop(3).forEach { slice ->
-                                ReportRow(slice.category, slice.amount, highlightNegative = false)
+                                ExpenseSliceBarRow(
+                                    category = slice.category,
+                                    amount = slice.amount,
+                                    total = totalExpense,
+                                    barColor = semantic.resolveAgricultureCategoryColor(slice.category),
+                                )
                             }
                         }
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ExpenseSliceBarRow(
+    category: String,
+    amount: Long,
+    total: Long,
+    barColor: Color,
+) {
+    val share = (amount.toFloat() / total.toFloat()).coerceIn(0f, 1f)
+    val percent = (share * 100f).toInt()
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(ArinaSpacing.xs),
+        ) {
+            Box(Modifier.size(8.dp).background(barColor, CircleShape))
+            Text(
+                category,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
+            )
+            Text(
+                "$percent%",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                amount.toRupiah(),
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                softWrap = false,
+            )
+        }
+        ArinaRatioBar(fraction = share, color = barColor, height = 6.dp)
     }
 }
 

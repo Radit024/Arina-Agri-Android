@@ -53,14 +53,24 @@ import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Calculate
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Savings
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.IconButton
+import com.mankeu.presentation.ArinaShapes
+import com.mankeu.presentation.ArinaSizes
+import com.mankeu.presentation.ArinaSpacing
+import com.mankeu.presentation.components.ArinaPrimaryButton
+import com.mankeu.presentation.components.ArinaSecondaryButton
+import com.mankeu.presentation.components.ArinaSegmentedControl
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -459,30 +469,40 @@ fun EntryScreen(
                 OutlinedTextField(
                     value = search,
                     onValueChange = { search = it },
-                    label = { Text(stringResource(R.string.home_search_hint)) },
+                    placeholder = { Text(stringResource(R.string.home_search_hint)) },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Default.Search,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    },
+                    trailingIcon = if (search.isNotBlank()) {
+                        {
+                            IconButton(onClick = { search = "" }) {
+                                Icon(
+                                    Icons.Default.Close,
+                                    contentDescription = stringResource(R.string.action_close),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                    } else null,
+                    shape = ArinaShapes.input,
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
             item {
-                val filters = listOf(
-                    "ALL" to stringResource(R.string.money_all),
-                    "IN" to stringResource(R.string.money_in_short),
-                    "OUT" to stringResource(R.string.money_out_short),
+                ArinaSegmentedControl(
+                    options = listOf(
+                        "ALL" to stringResource(R.string.money_all),
+                        "IN" to stringResource(R.string.money_in_short),
+                        "OUT" to stringResource(R.string.money_out_short),
+                    ),
+                    selected = direction,
+                    onSelected = { direction = it },
                 )
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(filters) { (value, label) ->
-                        FilterChip(
-                            selected = direction == value,
-                            onClick = { feedback(FeedbackEvent.TAP); direction = value },
-                            label = { Text(label) },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            ),
-                        )
-                    }
-                }
             }
 
             when {
@@ -540,60 +560,61 @@ fun EntryScreen(
         ModalBottomSheet(
             onDismissRequest = { feedback(FeedbackEvent.TAP); selected = null },
             sheetState = sheetState,
+            shape = ArinaShapes.sheet,
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
             contentColor = MaterialTheme.colorScheme.onSurface,
             tonalElevation = 0.dp,
         ) {
           val formTour = rememberSheetTour(Tour.ENTRY_FORM)
           Box(Modifier.fillMaxWidth()) {
-            // Same layout contract as MankeuSheet: the keyboard shrinks the sheet (imePadding on the
-            // outer column), only the fields scroll inside what is left (weight + verticalScroll),
-            // and Batal / Simpan sit below the scroll so they stay on screen with the keyboard up.
-            // The save button used to live at the end of the scrolling content, where an open
-            // keyboard made it unreachable even by scrolling.
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .imePadding()
                     .navigationBarsPadding()
-                    .padding(horizontal = 20.dp, vertical = 4.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                    .padding(horizontal = ArinaSpacing.lg, vertical = ArinaSpacing.xxs),
+                verticalArrangement = Arrangement.spacedBy(ArinaSpacing.sm),
             ) {
+              Row(
+                  modifier = Modifier.fillMaxWidth(),
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.spacedBy(ArinaSpacing.xs),
+              ) {
+                  Surface(shape = ArinaShapes.tile, color = MaterialTheme.colorScheme.primaryContainer) {
+                      Icon(kind.icon, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.padding(ArinaSpacing.xs).size(ArinaSizes.iconMd))
+                  }
+                  Text(
+                      stringResource(kind.labelRes),
+                      style = MaterialTheme.typography.titleLarge,
+                      fontWeight = FontWeight.SemiBold,
+                      modifier = Modifier.weight(1f),
+                  )
+                  IconButton(onClick = { feedback(FeedbackEvent.TAP); closeSheet() }) {
+                      Icon(
+                          Icons.Default.Close,
+                          contentDescription = stringResource(R.string.action_close),
+                          tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                      )
+                  }
+              }
               Column(
                 modifier = Modifier
                     .weight(1f, fill = false)
                     .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(14.dp),
+                verticalArrangement = Arrangement.spacedBy(ArinaSpacing.md),
               ) {
-                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().tourTarget(TourTarget.ENTRY_KINDS)) {
-                    SegmentedButton(
-                        selected = selected == FinancialEventType.CASH_INCOME,
-                        onClick = {
-                            selected = FinancialEventType.CASH_INCOME
-                            localError = null
-                        },
-                        shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
-                    ) {
-                        Text(stringResource(R.string.kind_cash_in), fontWeight = FontWeight.Bold)
-                    }
-                    SegmentedButton(
-                        selected = selected == FinancialEventType.CASH_EXPENSE,
-                        onClick = {
-                            selected = FinancialEventType.CASH_EXPENSE
-                            localError = null
-                        },
-                        shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
-                    ) {
-                        Text(stringResource(R.string.kind_cash_out), fontWeight = FontWeight.Bold)
-                    }
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Surface(shape = RoundedCornerShape(14.dp), color = MaterialTheme.colorScheme.primaryContainer) {
-                        Icon(kind.icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(8.dp))
-                    }
-                    Spacer(Modifier.width(10.dp))
-                    Text(stringResource(kind.labelRes), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
-                }
+                ArinaSegmentedControl(
+                    options = listOf(
+                        FinancialEventType.CASH_INCOME to stringResource(R.string.kind_cash_in),
+                        FinancialEventType.CASH_EXPENSE to stringResource(R.string.kind_cash_out),
+                    ),
+                    selected = selected ?: FinancialEventType.CASH_INCOME,
+                    onSelected = {
+                        selected = it
+                        localError = null
+                    },
+                    modifier = Modifier.tourTarget(TourTarget.ENTRY_KINDS),
+                )
                 CardDetails(
                     stateKey = "entry:${kind.type.name}",
                     showLabel = stringResource(R.string.form_guidance_show),
@@ -726,6 +747,7 @@ fun EntryScreen(
                         null
                     },
                     singleLine = true,
+                    shape = ArinaShapes.input,
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.Sentences,
                         imeAction = ImeAction.Next,
@@ -981,21 +1003,22 @@ fun EntryScreen(
                     Text(it, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
                 }
               }
-              Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                TextButton(onClick = { feedback(FeedbackEvent.TAP); closeSheet() }) {
-                    Text(stringResource(R.string.action_cancel))
-                }
-                Button(
-                    colors = primaryActionButtonColors(),
+              HorizontalDivider(thickness = ArinaSizes.hairline, color = MaterialTheme.colorScheme.outlineVariant)
+              Row(horizontalArrangement = Arrangement.spacedBy(ArinaSpacing.sm), verticalAlignment = Alignment.CenterVertically) {
+                ArinaSecondaryButton(
+                    text = stringResource(R.string.action_cancel),
+                    onClick = { feedback(FeedbackEvent.TAP); closeSheet() },
+                    modifier = Modifier.weight(1f),
+                )
+                ArinaPrimaryButton(
+                    text = stringResource(if (isSaving) R.string.entry_saving else R.string.entry_save),
+                    loading = isSaving,
+                    enabled = !isSaving && !justSaved,
                     onClick = {
-                        // Taps dispatched in the same frame all reach here before `enabled` can
-                        // recompose, so the handler re-checks what the button shows. Without this
-                        // the second tap re-validated a form the first had already cleared and
-                        // raised "Jumlah uang harus lebih dari nol" on top of a successful save.
-                        if (isSaving || justSaved) return@Button
+                        if (isSaving || justSaved) return@ArinaPrimaryButton
                         if (state.selectedProjectId == null) {
                             localError = errNoProject
-                            return@Button
+                            return@ArinaPrimaryButton
                         }
                         val parsedAmount = amount.toLongOrNull()
                         val parsedDate = runCatching { LocalDate.parse(date) }.getOrNull()
@@ -1055,27 +1078,10 @@ fun EntryScreen(
                             closeSheet()
                         }
                     },
-                    // Locked while the write is in flight. The ViewModel refuses a concurrent
-                    // second call regardless, so this is the visible half of the guard rather
-                    // than the guard itself.
-                    enabled = !isSaving && !justSaved,
-                    modifier = Modifier.weight(1f).height(52.dp).tourTarget(TourTarget.ENTRY_SAVE),
-                ) {
-                    if (isSaving) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(18.dp),
-                            strokeWidth = 2.dp,
-                            color = semantic.onActionContainer,
-                        )
-                        Spacer(Modifier.width(10.dp))
-                    }
-                    Text(
-                        stringResource(if (isSaving) R.string.entry_saving else R.string.entry_save),
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
+                    modifier = Modifier.weight(1.4f).tourTarget(TourTarget.ENTRY_SAVE),
+                )
               }
-              Spacer(Modifier.height(4.dp))
+              Spacer(Modifier.height(ArinaSpacing.xs))
             }
             SheetTour(formTour)
           }

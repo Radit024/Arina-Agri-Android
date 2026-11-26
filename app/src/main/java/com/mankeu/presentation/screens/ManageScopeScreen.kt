@@ -55,6 +55,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.BorderStroke
+import com.mankeu.presentation.ArinaShapes
+import com.mankeu.presentation.ArinaSizes
+import com.mankeu.presentation.ArinaSpacing
+import com.mankeu.presentation.components.ArinaCard
+import com.mankeu.presentation.components.ArinaPrimaryButton
+import com.mankeu.presentation.components.ArinaSecondaryButton
+import com.mankeu.presentation.components.arinaHairlineBorder
 import com.mankeu.presentation.components.primaryActionButtonColors
 import com.mankeu.R
 import com.mankeu.data.BusinessEntity
@@ -204,14 +212,21 @@ fun ManageScopeScreen(
             }
         }
         item {
-            Button(
-                colors = primaryActionButtonColors(),
-                onClick = { addBusiness = true },
-                modifier = Modifier.fillMaxWidth().tourTarget(TourTarget.SCOPE_ADD_BUSINESS),
-            ) {
-                Icon(Icons.Default.Add, contentDescription = null)
-                Spacer(Modifier.width(8.dp))
-                Text(stringResource(R.string.scope_add_business))
+            if (state.businesses.isEmpty()) {
+                ArinaPrimaryButton(
+                    text = stringResource(R.string.scope_add_business),
+                    icon = Icons.Default.Add,
+                    onClick = { addBusiness = true },
+                    modifier = Modifier.fillMaxWidth().tourTarget(TourTarget.SCOPE_ADD_BUSINESS),
+                )
+            } else {
+                ArinaSecondaryButton(
+                    text = stringResource(R.string.scope_add_business),
+                    icon = Icons.Default.Add,
+                    onClick = { addBusiness = true },
+                    tonal = true,
+                    modifier = Modifier.fillMaxWidth().tourTarget(TourTarget.SCOPE_ADD_BUSINESS),
+                )
             }
         }
 
@@ -241,15 +256,12 @@ fun ManageScopeScreen(
                 }
             }
             item {
-                Button(
-                    colors = primaryActionButtonColors(),
+                ArinaPrimaryButton(
+                    text = stringResource(R.string.scope_add_project),
+                    icon = Icons.Default.Add,
                     onClick = { addProject = true },
                     modifier = Modifier.fillMaxWidth().tourTarget(TourTarget.SCOPE_ADD_FIELD),
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = null)
-                    Spacer(Modifier.width(8.dp))
-                    Text(stringResource(R.string.scope_add_project))
-                }
+                )
             }
         }
     }
@@ -316,23 +328,25 @@ private fun ScopeRow(
     onEdit: () -> Unit,
     onRemove: (() -> Unit)?,
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
-        ),
+    ArinaCard(
+        containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerLow,
+        border = if (selected) {
+            BorderStroke(ArinaSizes.hairline, MaterialTheme.colorScheme.primary.copy(alpha = 0.45f))
+        } else {
+            arinaHairlineBorder()
+        },
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 10.dp),
+                .padding(horizontal = ArinaSpacing.md, vertical = ArinaSpacing.sm),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(end = 8.dp),
+                    .padding(end = ArinaSpacing.xs),
             ) {
                 Text(
                     text = title,
@@ -356,11 +370,12 @@ private fun ScopeRow(
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(ArinaSpacing.xxs),
             ) {
                 if (!selected) {
                     OutlinedButton(
                         onClick = onSelect,
+                        shape = ArinaShapes.button,
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
                         modifier = Modifier.heightIn(min = 40.dp),
                     ) {
@@ -374,26 +389,26 @@ private fun ScopeRow(
 
                 IconButton(
                     onClick = onEdit,
-                    modifier = Modifier.size(48.dp),
+                    modifier = Modifier.size(ArinaSizes.minTouchTarget),
                 ) {
                     Icon(
                         Icons.Default.Edit,
                         contentDescription = stringResource(R.string.scope_edit),
                         tint = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(22.dp),
+                        modifier = Modifier.size(ArinaSizes.iconMd),
                     )
                 }
 
                 if (onRemove != null) {
                     IconButton(
                         onClick = onRemove,
-                        modifier = Modifier.size(48.dp),
+                        modifier = Modifier.size(ArinaSizes.minTouchTarget),
                     ) {
                         Icon(
                             Icons.Default.DeleteOutline,
                             contentDescription = stringResource(R.string.scope_remove),
                             tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(22.dp),
+                            modifier = Modifier.size(ArinaSizes.iconMd),
                         )
                     }
                 }
